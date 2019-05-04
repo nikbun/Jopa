@@ -7,7 +7,7 @@ public class PlayerControllerBlue : PlayerController {
 	public override void CountPlus ()
 	{
 		numberChip = countChips++;
-		numberChip += 4;
+		numberChip += 8;
 	}
 	
 	public override int Count ()

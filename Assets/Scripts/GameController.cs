@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
+using Game;
 
 public class GameController : MonoBehaviour {
 	public GameObject[] players; //Массив фишек игрока
@@ -10,17 +11,20 @@ public class GameController : MonoBehaviour {
 	public int currentPlayer; //Текущий игрок
 	public int currentChip; // Текущая фишка
 	public Text tableNumber; // Подключен внешкий текст для вывода на экран чисел
-	public int cubeNumber;// Выпавшее число кубика
+	public Dice dice; // Игровая кость
 	public float speedGame; // Скорость игры
 	public bool blockButton;// Блокировка кнопки
+	public Map gameMap; // Игровая карта
 	
 	void Start () //Выставение фишек на начальные позиции 
 	{
+		gameMap = new Map();
+		dice = new Dice();
 		LoadStartPosition();
-		LoadChipPlayers();
 	}
 
-	void Update(){
+	void Update()
+	{
 		if(Input.GetKeyUp(KeyCode.Space) && !blockButton) StepUp();
 	}
 
@@ -33,41 +37,22 @@ public class GameController : MonoBehaviour {
 
 	// Загрузка начальных позиций
 	void LoadStartPosition(){
+		chipsPlayers = new GameObject[4 * countPlayers];
+		int currentNumberChip = 0;
+
 		for (int playerNumber = 0; playerNumber < countPlayers; playerNumber++){
 			for (int chipNumber = 0; chipNumber < 4; chipNumber++){
-				Vector3 spawnPosition = players[playerNumber].transform.position;
+				Vector3 spawnPosition = gameMap.GetStartPosition((PlayerPositions)playerNumber);
 				Quaternion spawnRotation = new Quaternion ();
-				Instantiate (players[playerNumber], spawnPosition, spawnRotation);
+				chipsPlayers[currentNumberChip++] =
+					Instantiate (players[playerNumber], spawnPosition, spawnRotation);
 			}
 		}
-	}
 
-	// Загрузка игроков
-	void LoadChipPlayers(){
-		// Выполняет заполнение массива фишками
-		chipsPlayers = new GameObject[4 * countPlayers];
-		GameObject[] findingChips;
-		int currentNumberChip = 0;
-		if (countPlayers >= 1) {
-			findingChips = GameObject.FindGameObjectsWithTag("GreenPlayerTag");
-			foreach (GameObject chip in findingChips) chipsPlayers[currentNumberChip++] = chip;
-		}
-		if (countPlayers >= 2) {
-			findingChips = GameObject.FindGameObjectsWithTag("BluePlayerTag");
-			foreach (GameObject chip in findingChips) chipsPlayers[currentNumberChip++] = chip;
-		}
-		if (countPlayers >= 3) {
-			findingChips = GameObject.FindGameObjectsWithTag("RedPlayerTag");
-			foreach (GameObject chip in findingChips) chipsPlayers[currentNumberChip++] = chip;
-		}
-		if (countPlayers == 4) {
-			findingChips = GameObject.FindGameObjectsWithTag("YellowPlayerTag");
-			foreach (GameObject chip in findingChips) chipsPlayers[currentNumberChip++] = chip;
-		}
-		
 		// Создает массив скриптов из объектов
 		chipsPlayScripts = new PlayerController[chipsPlayers.Length];
-		for(int i = 0 ; i < chipsPlayers.Length; i++){
+		for (int i = 0; i < chipsPlayers.Length; i++)
+		{
 			chipsPlayScripts[i] = chipsPlayers[i].GetComponent<PlayerController>();
 		}
 	}
@@ -77,8 +62,7 @@ public class GameController : MonoBehaviour {
 	{
 		if (!blockButton){
 			LockButton();
-			cubeNumber = Random.Range (1, 7);
-			tableNumber.text = cubeNumber.ToString();//Вывод на экран
+			tableNumber.text = dice.Throw().ToString();//Вывод на экран
 
 			if (currentPlayer == countPlayers)currentPlayer = 1;
 			else currentPlayer++;
@@ -91,14 +75,14 @@ public class GameController : MonoBehaviour {
 			} else {
 				switch (currentPlayer){
 				case 1: posChip = 0; break;
-				case 2: posChip = 8; break;
-				case 3: posChip = 4; break;
+				case 2: posChip = 4; break;
+				case 3: posChip = 8; break;
 				case 4: posChip = 12; break;
 				}
 			}
 			for(int i = 0; i < 4; i++ ){
-				if (!canMove) canMove = chipsPlayScripts[posChip++].CanMove(cubeNumber ,GetAllChipPosition());
-				else chipsPlayScripts[posChip++].CanMove(cubeNumber ,GetAllChipPosition());
+				if (!canMove) canMove = chipsPlayScripts[posChip++].CanMove(dice.GetLastNumber() ,GetAllChipPosition());
+				else chipsPlayScripts[posChip++].CanMove(dice.GetLastNumber(), GetAllChipPosition());
 			}
 			if (!canMove) UnlockButton();
 		}
@@ -128,11 +112,6 @@ public class GameController : MonoBehaviour {
 		return vectorPosition;
 	}
 
-	public int GetCubeNumber(){
-		int cNumber = cubeNumber;
-		cubeNumber = 0;
-		return cNumber;
-	}
 	// Возвращает количество игроков
 	public int GetCountPlayers(){
 		return countPlayers;

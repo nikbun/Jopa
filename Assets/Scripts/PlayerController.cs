@@ -28,7 +28,7 @@ abstract public class PlayerController : MonoBehaviour {
 	void OnMouseDown(){
 		if (canMove){
 			gameControllerScript.SetCurrentChip(numberChip);
-			cNumber = gameControllerScript.GetCubeNumber();
+			cNumber = gameControllerScript.dice.GetLastNumber();
 		}
 	}
 
