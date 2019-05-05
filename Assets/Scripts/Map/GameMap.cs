@@ -1,19 +1,19 @@
 ﻿using UnityEngine;
 using System.Collections;
 using System.Collections.Generic;
-using Game.Cells;
-using Game.MapObjects;
+using Assets.Scripts.Map.MapObjects;
 
-namespace Game
+namespace Assets.Scripts.Map
 {
-	public class Map
+
+	public class GameMap
 	{
 		private OuterCircleCell[] outerCircle { get; set; } // Внешний круг, общая зона
 		private Dictionary<PlayerPositions, Vector3> startPositions { get; set; } // Стартовые позиции игроков
 		private Dictionary<PlayerPositions, Home> home { get; set; } // Дома игроков
 		private Dictionary<PlayerPositions, Vector3> jopa { get; set; } // Жопа
 
-		public Map()
+		public GameMap()
 		{
 			InitStartPositions();
 			InitOuterCircle();
@@ -29,12 +29,12 @@ namespace Game
 		private void InitStartPositions()
 		{
 			startPositions = new Dictionary<PlayerPositions, Vector3>()
-			{
-				{PlayerPositions.Bottom, new Vector3(0, 0, -7.2f)},
-				{PlayerPositions.Left, new Vector3(-7.2f, 0, 0)},
-				{PlayerPositions.Top, new Vector3(0, 0, 7.2f)},
-				{PlayerPositions.Right, new Vector3(7.2f, 0, 0)}
-			};
+		{
+			{PlayerPositions.Bottom, new Vector3(0, 0, -7.2f)},
+			{PlayerPositions.Left, new Vector3(-7.2f, 0, 0)},
+			{PlayerPositions.Top, new Vector3(0, 0, 7.2f)},
+			{PlayerPositions.Right, new Vector3(7.2f, 0, 0)}
+		};
 		}
 
 		private void InitOuterCircle()
@@ -83,7 +83,7 @@ namespace Game
 
 		private void InitShortcut()
 		{
-			outerCircle[2].shortcut = new Shortcut(outerCircle[2], outerCircle[10], new []{ new Vector3(-2, 0, -4.5f), new Vector3(-4.5f, 0, -2) });
+			outerCircle[2].shortcut = new Shortcut(outerCircle[2], outerCircle[10], new[] { new Vector3(-2, 0, -4.5f), new Vector3(-4.5f, 0, -2) });
 			outerCircle[14].shortcut = new Shortcut(outerCircle[14], outerCircle[22], new[] { new Vector3(-4.5f, 0, 2), new Vector3(-2, 0, -4.5f) });
 			outerCircle[26].shortcut = new Shortcut(outerCircle[26], outerCircle[34], new[] { new Vector3(2, 0, 4.5f), new Vector3(4.5f, 0, 2) });
 			outerCircle[38].shortcut = new Shortcut(outerCircle[38], outerCircle[46], new[] { new Vector3(4.5f, 0, -2), new Vector3(2, 0, -4.5f) });
@@ -92,23 +92,23 @@ namespace Game
 		private void InitHome()
 		{
 			home = new Dictionary<PlayerPositions, Home>()
-			{
-				{PlayerPositions.Bottom, new Home(new Cell(-5,0), new Cell(-4,0), new Cell(-3,0), new Cell(-2,0))},
-				{PlayerPositions.Left, new Home(new Cell(0,-5), new Cell(0,-4), new Cell(0,-3), new Cell(0,-2))},
-				{PlayerPositions.Top, new Home(new Cell(5,0), new Cell(4,0), new Cell(3,0), new Cell(2,0))},
-				{PlayerPositions.Right, new Home(new Cell(0,5), new Cell(0,4), new Cell(0,3), new Cell(0,2))}
-			};
+		{
+			{PlayerPositions.Bottom, new Home(new Cell(-5,0), new Cell(-4,0), new Cell(-3,0), new Cell(-2,0))},
+			{PlayerPositions.Left, new Home(new Cell(0,-5), new Cell(0,-4), new Cell(0,-3), new Cell(0,-2))},
+			{PlayerPositions.Top, new Home(new Cell(5,0), new Cell(4,0), new Cell(3,0), new Cell(2,0))},
+			{PlayerPositions.Right, new Home(new Cell(0,5), new Cell(0,4), new Cell(0,3), new Cell(0,2))}
+		};
 		}
 
 		private void InitJopa()
 		{
 			jopa = new Dictionary<PlayerPositions, Vector3>()
-			{
-				{PlayerPositions.Bottom, new Vector3(-1, 0, 0)},
-				{PlayerPositions.Left, new Vector3(0, 0, -1)},
-				{PlayerPositions.Top, new Vector3(1, 0, 0)},
-				{PlayerPositions.Right, new Vector3(0, 0, 1)}
-			};
+		{
+			{PlayerPositions.Bottom, new Vector3(-1, 0, 0)},
+			{PlayerPositions.Left, new Vector3(0, 0, -1)},
+			{PlayerPositions.Top, new Vector3(1, 0, 0)},
+			{PlayerPositions.Right, new Vector3(0, 0, 1)}
+		};
 		}
 
 

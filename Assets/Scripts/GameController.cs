@@ -1,140 +1,64 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
-using Game;
+using Assets.Scripts.Map;
 
-public class GameController : MonoBehaviour {
-	public GameObject[] players; //Массив фишек игрока
-	public GameObject[] chipsPlayers; //Зеленые фишки
-	public PlayerController[] chipsPlayScripts; // Их скрипты
-	public int countPlayers; // Количество игроков
-	public int currentPlayer; //Текущий игрок
-	public int currentChip; // Текущая фишка
-	public Text tableNumber; // Подключен внешкий текст для вывода на экран чисел
-	public Dice dice; // Игровая кость
-	public float speedGame; // Скорость игры
-	public bool blockButton;// Блокировка кнопки
-	public Map gameMap; // Игровая карта
-	
-	void Start () //Выставение фишек на начальные позиции 
+namespace Assets.Scripts
+{
+	public class GameController : MonoBehaviour
 	{
-		gameMap = new Map();
-		dice = new Dice();
-		LoadStartPosition();
-	}
+		public float gameSpeed; // Скорость игры
+		public int countPlayers;
+		public GameObject[] instancesPawns; // Экземпляры фишек игроков
+		
+		Player[] players;
+		int currentPlayer;
+		Dice dice; // Игровая кость
 
-	void Update()
-	{
-		if(Input.GetKeyUp(KeyCode.Space) && !blockButton) StepUp();
-	}
+		public GameMap gameMap { get; } // Игровая карта
 
-	void FixedUpdate(){
-		// Если текущий номер не меньше нуля, то движемся пока номер не вернет 0
-		if (currentChip >= 0){
-			chipsPlayScripts[currentChip].Mover();
-		}
-	}
-
-	// Загрузка начальных позиций
-	void LoadStartPosition(){
-		chipsPlayers = new GameObject[4 * countPlayers];
-		int currentNumberChip = 0;
-
-		for (int playerNumber = 0; playerNumber < countPlayers; playerNumber++){
-			for (int chipNumber = 0; chipNumber < 4; chipNumber++){
-				Vector3 spawnPosition = gameMap.GetStartPosition((PlayerPositions)playerNumber);
-				Quaternion spawnRotation = new Quaternion ();
-				chipsPlayers[currentNumberChip++] =
-					Instantiate (players[playerNumber], spawnPosition, spawnRotation);
-			}
-		}
-
-		// Создает массив скриптов из объектов
-		chipsPlayScripts = new PlayerController[chipsPlayers.Length];
-		for (int i = 0; i < chipsPlayers.Length; i++)
+		GameController()
 		{
-			chipsPlayScripts[i] = chipsPlayers[i].GetComponent<PlayerController>();
+			gameMap = new GameMap();
+			GlobalGameData.GameController = this;
+			GlobalGameData.GameSpeed = gameSpeed;
 		}
-	}
 
-	//Симуляция бросания кубика( выдает цифру от 1 до 6)
-	public void StepUp()
-	{
-		if (!blockButton){
-			LockButton();
-			tableNumber.text = dice.Throw().ToString();//Вывод на экран
+		void Start() //Выставение фишек на начальные позиции 
+		{
+			dice = new Dice();
+			LoadPlayers();
+		}
 
-			if (currentPlayer == countPlayers)currentPlayer = 1;
-			else currentPlayer++;
+		void Update()
+		{
+			//if (Input.GetKeyUp(KeyCode.Space) && !blockButton) StepUp();
+		}
 
-			// Какие фишки могут ходить
-			bool canMove = false;
-			int posChip = 0;
-			if (countPlayers <= 2){
-				posChip = (currentPlayer - 1) * 4;
-			} else {
-				switch (currentPlayer){
-				case 1: posChip = 0; break;
-				case 2: posChip = 4; break;
-				case 3: posChip = 8; break;
-				case 4: posChip = 12; break;
+		/// <summary>
+		/// Загружаем игроков и их фишки на стартовые позиции
+		/// </summary>
+		void LoadPlayers()
+		{
+			players = new Player[countPlayers];
+			for (int i = 0; i < countPlayers; i++)
+			{
+				Pawn[] pawns = new Pawn[4];
+				for (int p = 0; p < pawns.Length; p++)
+				{
+					GameObject pawnObject = Instantiate(this.instancesPawns[i], gameMap.GetStartPosition((PlayerPositions)i), Quaternion.Euler(90,0,0));
+					pawns[p] = pawnObject.GetComponent<Pawn>();
 				}
+				players[i] = new Player((PlayerPositions)i, pawns);
 			}
-			for(int i = 0; i < 4; i++ ){
-				if (!canMove) canMove = chipsPlayScripts[posChip++].CanMove(dice.GetLastNumber() ,GetAllChipPosition());
-				else chipsPlayScripts[posChip++].CanMove(dice.GetLastNumber(), GetAllChipPosition());
-			}
-			if (!canMove) UnlockButton();
 		}
-	}
-	
-	public void LockButton(){
-		blockButton = true;
-	}
 
-	public void UnlockButton(){
-		blockButton = false;
-	}
-
-	// Выключает ходилки кроме текущей
-	public void NotCanMove(){
-		for (int i = 0; i < countPlayers * 4; i++){
-			if (i == currentChip)i++;
-			else chipsPlayScripts[i].NotCanMove();
+		/// <summary>
+		/// Выбрать следующего игрока
+		/// </summary>
+		public void NextPlayer()
+		{
+			currentPlayer = ++currentPlayer & 3;
 		}
-	}
-
-	// Возвращает все позиции игроков
-	public Vector3[] GetAllChipPosition(){
-		Vector3[] vectorPosition = new Vector3[countPlayers * 4];
-		for (int i = 0; i < countPlayers * 4; i++)
-			vectorPosition[i] = chipsPlayers[i].transform.position;
-		return vectorPosition;
-	}
-
-	// Возвращает количество игроков
-	public int GetCountPlayers(){
-		return countPlayers;
-	}
-
-	public void SetNullCurrentChip(){
-		currentChip = -1;
-	}
-
-	public void SetCurrentChip(int chip){
-		currentChip = chip;
-		NotCanMove();
-	}
-
-	
-	public void SetCurrentNumberChip(GameObject chip){
-		currentChip = GetNumberFromPlayers(chipsPlayers, chip);
-	}
-
-	public int GetNumberFromPlayers(GameObject[] fromFind, GameObject toFind){
-		for(int i = 0; i < fromFind.Length; i++){
-			if (fromFind[i].GetHashCode().Equals(toFind.GetHashCode()))return i;
-		}
-		return -1;
 	}
 }
