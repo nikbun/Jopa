@@ -1,34 +1,57 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.UI;
 
-namespace Assets.Scripts
+
+public class Dice : MonoBehaviour
 {
-	public class Dice
+	public Text textNumber;
+	private int number;
+	public static Dice instance = null;
+
+	public Dice()
 	{
-		private int lastNumber;
+		number = 1;
+	}
 
-		public Dice()
-		{
-			lastNumber = 1;
-		}
+	private void Awake()
+	{
+		if (instance == null)
+			instance = this;
+		else if (instance != this)
+			Destroy(gameObject);
+	}
 
-		/// <summary>
-		/// Бросить кость
-		/// </summary>
-		/// <returns>Число от 1 до 6</returns>
-		public int Throw()
-		{
-			lastNumber = Random.Range(1, 7);
-			return lastNumber;
-		}
+	void Update()
+	{
+		if (Input.GetKeyUp(KeyCode.Space))
+			Roll();
+	}
 
-		/// <summary>
-		/// получить последнне выбрашенное число
-		/// </summary>
-		/// <returns></returns>
-		public int GetLastNumber()
+	/// <summary>
+	/// Бросить кость
+	/// </summary>
+	/// <returns>Число от 1 до 6</returns>
+	public void Roll()
+	{
+		if (GameController.instance.gameState == GameStates.RollDice)
 		{
-			return lastNumber;
+			number = Random.Range(1, 7);
+			// TODO Удалить или обернуть директиву дебага
+			if (GameController.instance.DebugDiceNumber > 0)
+				number = GameController.instance.DebugDiceNumber;
+			textNumber.text = number.ToString();
+			Debug.Log("Игрок кинул кубик. Выпало число " + number);
+			GameController.instance.CanMovePawns(number);
 		}
+	}
+
+	/// <summary>
+	/// получить последнне выбрашенное число
+	/// </summary>
+	/// <returns></returns>
+	public int GetNumber()
+	{
+		return number;
 	}
 }

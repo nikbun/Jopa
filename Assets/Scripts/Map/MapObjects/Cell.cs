@@ -1,20 +1,25 @@
 ﻿using UnityEngine;
 
-namespace Assets.Scripts.Map.MapObjects
+namespace Map.MapObjects
 {
-	class Cell
+	public class Cell
 	{
+		public MapPawn pawn;
+		public Location location;
 		public Vector3 position { get; set; }
-		public bool busy { get; set; }
 
-		public Cell(Vector3 position)
+		public Cell(){}
+
+		public Cell(float x, float z, Location location)
 		{
-			this.position = position;
+			position = new Vector3(x, 0, z);
+			this.location = location;
 		}
 
-		public Cell(float x, float y)
+		public bool CanOccupy(MapPawn pawn)
 		{
-			this.position = new Vector3(x, 0, y);
+			return this.pawn == null;
+			//return !(this.pawn?.playerPosition == pawn.playerPosition);
 		}
 	}
 }

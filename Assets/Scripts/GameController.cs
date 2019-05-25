@@ -1,64 +1,84 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
-using Assets.Scripts.Map;
+using Map;
+using System.Collections.Generic;
 
-namespace Assets.Scripts
+public class GameController : MonoBehaviour
 {
-	public class GameController : MonoBehaviour
+	public float gameSpeed = 10; // Скорость игры
+	public GameStates gameState = GameStates.RollDice; // Состояние игры
+	public int countPlayers = 4; // Количество игроков
+	public int currentPlayer = 0;
+	public static GameController instance = null; // Статичный экземпляр контроллера игры
+	public List<GameObject> instancePlayers; // Экземпляры игроков
+	public Dictionary<PlayerPosition, Player> players = new Dictionary<PlayerPosition, Player>(); // Скрипты игроков для управления игроками
+	public GameMap gameMap = new GameMap(); // Игровая карта
+	
+	// TODO Удалить или обернуть директиву дебага если
+	public int DebugDiceNumber = 0;
+
+	private void Awake()
 	{
-		public float gameSpeed; // Скорость игры
-		public int countPlayers;
-		public GameObject[] instancesPawns; // Экземпляры фишек игроков
-		
-		Player[] players;
-		int currentPlayer;
-		Dice dice; // Игровая кость
+		if (instance == null)
+			instance = this;
+		else if (instance != this)
+			Destroy(gameObject);
+	}
 
-		public GameMap gameMap { get; } // Игровая карта
+	void Start() //Выставение фишек на начальные позиции 
+	{
+		InitPlayers();
+	}
 
-		GameController()
+	/// <summary>
+	/// Загружаем игроков на стартовые позиции
+	/// </summary>
+	void InitPlayers()
+	{
+		for (int i = 0; i < countPlayers; i++)
 		{
-			gameMap = new GameMap();
-			GlobalGameData.GameController = this;
-			GlobalGameData.GameSpeed = gameSpeed;
-		}
-
-		void Start() //Выставение фишек на начальные позиции 
-		{
-			dice = new Dice();
-			LoadPlayers();
-		}
-
-		void Update()
-		{
-			//if (Input.GetKeyUp(KeyCode.Space) && !blockButton) StepUp();
-		}
-
-		/// <summary>
-		/// Загружаем игроков и их фишки на стартовые позиции
-		/// </summary>
-		void LoadPlayers()
-		{
-			players = new Player[countPlayers];
-			for (int i = 0; i < countPlayers; i++)
-			{
-				Pawn[] pawns = new Pawn[4];
-				for (int p = 0; p < pawns.Length; p++)
-				{
-					GameObject pawnObject = Instantiate(this.instancesPawns[i], gameMap.GetStartPosition((PlayerPositions)i), Quaternion.Euler(90,0,0));
-					pawns[p] = pawnObject.GetComponent<Pawn>();
-				}
-				players[i] = new Player((PlayerPositions)i, pawns);
-			}
-		}
-
-		/// <summary>
-		/// Выбрать следующего игрока
-		/// </summary>
-		public void NextPlayer()
-		{
-			currentPlayer = ++currentPlayer & 3;
+			var playerPos = (PlayerPosition)i;
+			var player = Instantiate(instancePlayers[i], gameMap.GetOriginPosition(playerPos), Quaternion.identity);
+			var sPlayer = player.GetComponent<Player>();
+			sPlayer.playerPosition = playerPos;
+			players.Add(playerPos, sPlayer);
 		}
 	}
+
+	/// <summary>
+	/// Выбрать следующего игрока
+	/// </summary>
+	public int NextTurn()
+	{
+		currentPlayer = (++currentPlayer)%countPlayers;
+		gameState = GameStates.RollDice;
+		return currentPlayer;
+	}
+
+	public void CanMovePawns(int steps)
+	{
+		bool canMove = players[(PlayerPosition)currentPlayer].CanMovePawns(steps);
+		if (canMove)
+			gameState = GameStates.WalkPawn;
+		else
+			NextTurn();
+	}
+
+	public void EndTurn()
+	{
+		foreach (var key in players.Keys)
+		{
+			if (!players[key].IsPawnsEndMove())
+				return;
+		}
+		NextTurn();
+	}
+}
+
+public enum GameStates
+{
+	RollDice,
+	ChoosePawn,
+	WalkPawn
 }

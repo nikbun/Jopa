@@ -3,22 +3,65 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Assets.Scripts.Map;
+using Map;
 using UnityEngine;
 
-namespace Assets.Scripts
+public class Player : MonoBehaviour 
 {
-	public class Player
-	{
-		public PlayerPositions playerPositions { get; }
-		public MapAdapter mapAdapter { get; }
-		public Pawn[] pawns { get; set; }
+	public PlayerPosition playerPosition;
+	public GameObject pawnInstance;
+	public List<Pawn> pawns = new List<Pawn>();
+	GameMap gameMap;
 
-		public Player(PlayerPositions playerPositions, Pawn[] pawns)
+	private void Start()
+	{
+		gameMap = GameController.instance.gameMap;
+		initPawns();
+	}
+
+	void initPawns()
+	{
+		for (int i = 0; i < 4; i++)
 		{
-			this.pawns = pawns;
-			this.playerPositions = playerPositions;
-			mapAdapter = new MapAdapter(this, GlobalGameData.GameController.gameMap);
+			var pawn = Instantiate(pawnInstance, transform.position, Quaternion.Euler(90f, 0, 0));
+			pawn.transform.SetParent(transform);
+			var sPawn = pawn.GetComponent<Pawn>();
+			sPawn.player = this;
+			pawns.Add(sPawn);
 		}
 	}
+
+	public bool CanMovePawns(int steps)
+	{
+		bool canMove = false;
+		foreach (var pawn in pawns)
+		{
+			canMove = gameMap.CanMove(pawn, steps) || canMove; 
+		}
+		return canMove;
+	}
+
+	public void OffCanMove()
+	{
+		foreach (var pawn in pawns)
+		{
+			pawn.canMove = false;
+		}
+	}
+
+	public bool IsPawnsEndMove()
+	{
+		return !pawns.Exists(p => p.move);
+	}
+}
+
+/// <summary>
+/// Расположение игроков на карте
+/// </summary>
+public enum PlayerPosition
+{
+	Bottom,
+	Left,
+	Top,
+	Right
 }

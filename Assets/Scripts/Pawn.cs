@@ -1,58 +1,70 @@
 ﻿using UnityEngine;
+using Map;
+using System.Collections.Generic;
 using System.Collections;
-namespace Assets.Scripts
+using Map.MapObjects;
+
+public class Pawn : MonoBehaviour, MapPawn
 {
-	public class Pawn : MonoBehaviour
+	// Визуально показывает, что может ходить
+	public SpriteRenderer outline; 
+	public Location location { get; set; }
+	public PlayerPosition playerPosition { get { return player.playerPosition; } }
+
+	public Player player;
+	public bool canMove { get { return outline.enabled; } set { outline.enabled = value; } }
+	public Trace trace { get; set; }
+
+	public bool move = false;
+
+	void Start()
 	{
-		private bool canMove = false;
-		private int numberMovePoint = 0;
-		private Vector3[] movePoints;
+		location = Location.Origin;
+		canMove = false;
+	}
 
-		void Start()
+	private void OnMouseDown()
+	{
+		if (canMove)
 		{
-
+			Debug.Log("Фишка начинает движение. Текущая локация - "+location+" Длина пути - "+trace.way.Count);
+			player.OffCanMove();
+			StartCoroutine(Move());
+			move = true;
 		}
+	}
 
-		void Update()
+	private IEnumerator Move()
+	{
+		for(int i = 0; i < trace.way.Count; i++)
 		{
-
+			yield return StartCoroutine( MoveToPoint(trace.way[i]));
 		}
-
-		private void FixedUpdate()
+		
+		if (trace.from != null)
+			trace.from.pawn = null;
+		if (trace.to != null)
 		{
-			Move();
+			trace.to.pawn = this;
+			location = trace.to.location;
+			trace.from = trace.to;
+			trace.to = null;
+			trace.way = null;
 		}
+		Debug.Log("Фишка закончила движение. Текущая локация - "+location);
+		move = false;
+		GameController.instance.EndTurn();
+	}
 
-		public void Move(Vector3[] movePoints)
+	private IEnumerator MoveToPoint(Vector3 target)
+	{
+		Debug.Log("Фишка движется к " + target);
+		var sqrDistance = (target - transform.position).sqrMagnitude;
+		while (sqrDistance > float.Epsilon)
 		{
-			this.movePoints = movePoints;
-			numberMovePoint = 0;
-			canMove = true;
-		}
-
-		private void Move()
-		{
-			if (!canMove)
-				return;
-
-			if (MoveToPoint(movePoints[numberMovePoint]))
-			{
-				canMove = movePoints.Length > ++numberMovePoint;
-			}
-		}
-
-		private bool MoveToPoint(Vector3 targetPoint)
-		{
-			bool targetReached = false;
-			Vector3 moveDirection = targetPoint - transform.position;
-			Vector3 moveVector = moveDirection.normalized * GlobalGameData.GameSpeed * Time.deltaTime;
-			if (moveDirection.magnitude < moveVector.magnitude)
-			{
-				moveVector = moveDirection;
-				targetReached = true;
-			}
-			transform.Translate(moveVector);
-			return targetReached;
+			transform.position = Vector3.MoveTowards(transform.position, target, GameController.instance.gameSpeed * Time.deltaTime);
+			sqrDistance = (target - transform.position).sqrMagnitude;
+			yield return null;
 		}
 	}
 }
