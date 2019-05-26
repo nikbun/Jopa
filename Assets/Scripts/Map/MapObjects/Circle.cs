@@ -41,7 +41,7 @@ namespace Map.MapObjects
 				if (pawn.inGame && (end == iFrom || i - 1 == end))
 					return home.CanMove(pawn, iTo - i + 1, trace);
 				trace.to = cells[i % cells.Count];
-				canMove = trace.to.CanOccupy(pawn);
+				canMove = trace.to.CanOccupy(pawn, --steps <= 0);
 				trace.way.Add(trace.to.position);
 			}
 
@@ -61,7 +61,7 @@ namespace Map.MapObjects
 			for (int i = iFrom; i > iTo && canMove; i--)
 			{
 				trace.to = cells[i % cells.Count];
-				canMove = trace.to.CanOccupy(pawn);
+				canMove = trace.to.CanOccupy(pawn, --steps <= 0);
 				trace.way.Add(trace.to.position);
 			}
 

@@ -11,7 +11,7 @@ public class Player : MonoBehaviour
 	public PlayerPosition playerPosition;
 	public GameObject pawnInstance;
 	public List<Pawn> pawns = new List<Pawn>();
-	GameMap gameMap;
+	public GameMap gameMap;
 
 	private void Start()
 	{

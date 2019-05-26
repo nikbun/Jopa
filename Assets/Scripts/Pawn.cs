@@ -29,30 +29,23 @@ public class Pawn : MonoBehaviour, MapPawn
 		if (canMove)
 		{
 			player.OffCanMove();
-			StartCoroutine(Move());
 			move = true;
+			StartCoroutine(Move(location != Location.Jopa));
 		}
 	}
 
-	private IEnumerator Move()
+	private IEnumerator Move(bool withHit = true)
 	{
 		for(int i = 0; i < trace.way.Count; i++)
 		{
+			if (withHit && i + 1 == trace.way.Count)
+				HitOtherPawn(trace.way[i]);
 			yield return StartCoroutine( MoveToPoint(trace.way[i]));
 		}
 
 		if (!inGame && location == Location.Circle)
 			inGame = true;
-		if (trace.from != null)
-			trace.from.pawn = null;
-		if (trace.to != null)
-		{
-			trace.to.pawn = this;
-			location = trace.to.location;
-			trace.from = trace.to;
-			trace.to = null;
-			trace.way = null;
-		}
+		trace.UpdateTrace(this, true);
 		move = false;
 		GameController.instance.EndTurn();
 	}
@@ -65,6 +58,26 @@ public class Pawn : MonoBehaviour, MapPawn
 			transform.position = Vector3.MoveTowards(transform.position, target, GameController.instance.gameSpeed * Time.deltaTime);
 			sqrDistance = (target - transform.position).sqrMagnitude;
 			yield return null;
+		}
+	}
+
+	public void Shift()
+	{
+		var pos = player.gameMap.GetJopaPosition(playerPosition);
+		trace.UpdateTrace();
+		trace.way.Add(pos);
+		location = Location.Jopa;
+		move = true;
+		StartCoroutine(Move(false));
+	}
+
+	private void HitOtherPawn(Vector3 target)
+	{
+		Vector3 direction = target - transform.position;
+		var hits = Physics.RaycastAll(transform.position, direction.normalized, direction.magnitude, 1 << gameObject.layer);
+		if (hits.Length > 0)
+		{
+			hits[0].transform.GetComponent<MapPawn>().Shift();
 		}
 	}
 }

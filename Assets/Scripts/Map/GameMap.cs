@@ -11,17 +11,24 @@ namespace Map
 		private Circle circle;
 		private Origin origin;
 		private Home home;
+		private Jopa jopa;
 
 		public GameMap()
 		{
 			circle = new Circle();
 			origin = new Origin(circle);
 			home = new Home(circle);
+			jopa = new Jopa(origin);
 		}
 
 		public Vector3 GetOriginPosition(PlayerPosition playerPosition)
 		{
 			return origin.GetPosition(playerPosition);
+		}
+
+		public Vector3 GetJopaPosition(PlayerPosition playerPosition)
+		{
+			return jopa.GetPosition(playerPosition);
 		}
 
 		public bool CanMove(MapPawn pawn, int steps)
@@ -34,6 +41,8 @@ namespace Map
 					return circle.CanMove(pawn, steps);
 				case Location.Home:
 					return home.CanMove(pawn, steps);
+				case Location.Jopa:
+					return jopa.CanMove(pawn, steps);
 				default:
 					return false;
 			}
@@ -49,6 +58,8 @@ namespace Map
 		Location location { get; set; }
 		// Позиция игрока
 		PlayerPosition playerPosition { get; }
+
+		void Shift();
 	}
 
 	/// <summary>
@@ -66,12 +77,35 @@ namespace Map
 			this.from = from;
 			this.to = to;
 		}
+
+		public void UpdateTrace(MapPawn pawn = null, bool updateLocation = false)
+		{
+			if (from != null && pawn != null)
+				from.pawn = null;
+			from = null;
+			if (to != null)
+			{
+				from = to;
+				to = null;
+				if (pawn != null)
+				{
+					from.pawn = pawn;
+					if (updateLocation)
+						pawn.location = from.location;
+				}
+			}
+			if (way != null)
+				way.Clear();
+			else
+				way = new List<Vector3>();
+		}
 	}
 
 	public enum Location
 	{
 		Origin,
 		Circle,
-		Home
+		Home,
+		Jopa
 	}
 }

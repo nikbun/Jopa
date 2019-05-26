@@ -16,10 +16,10 @@ namespace Map.MapObjects
 			this.location = location;
 		}
 
-		public bool CanOccupy(MapPawn pawn)
+		public bool CanOccupy(MapPawn pawn, bool lastCell = false)
 		{
-			return this.pawn == null || this.pawn.Equals(pawn);
-			//return !(this.pawn?.playerPosition == pawn.playerPosition);
+			return this.pawn == null || this.pawn.Equals(pawn)
+				|| lastCell && this.pawn?.playerPosition != pawn.playerPosition;
 		}
 	}
 }
