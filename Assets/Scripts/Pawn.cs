@@ -13,6 +13,7 @@ public class Pawn : MonoBehaviour, MapPawn
 
 	public Player player;
 	public bool canMove { get { return outline.enabled; } set { outline.enabled = value; } }
+	public bool inGame { get; set; }
 	public Trace trace { get; set; }
 
 	public bool move = false;
@@ -27,7 +28,6 @@ public class Pawn : MonoBehaviour, MapPawn
 	{
 		if (canMove)
 		{
-			Debug.Log("Фишка начинает движение. Текущая локация - "+location+" Длина пути - "+trace.way.Count);
 			player.OffCanMove();
 			StartCoroutine(Move());
 			move = true;
@@ -40,7 +40,9 @@ public class Pawn : MonoBehaviour, MapPawn
 		{
 			yield return StartCoroutine( MoveToPoint(trace.way[i]));
 		}
-		
+
+		if (!inGame && location == Location.Circle)
+			inGame = true;
 		if (trace.from != null)
 			trace.from.pawn = null;
 		if (trace.to != null)
@@ -51,14 +53,12 @@ public class Pawn : MonoBehaviour, MapPawn
 			trace.to = null;
 			trace.way = null;
 		}
-		Debug.Log("Фишка закончила движение. Текущая локация - "+location);
 		move = false;
 		GameController.instance.EndTurn();
 	}
 
 	private IEnumerator MoveToPoint(Vector3 target)
 	{
-		Debug.Log("Фишка движется к " + target);
 		var sqrDistance = (target - transform.position).sqrMagnitude;
 		while (sqrDistance > float.Epsilon)
 		{

@@ -6,6 +6,8 @@ namespace Map.MapObjects
 {
 	public class Circle
 	{
+		public Home home;
+
 		private List<Cell> cells = new List<Cell>();
 		private Dictionary<PlayerPosition, int> shift = new Dictionary<PlayerPosition, int>();
 
@@ -29,46 +31,52 @@ namespace Map.MapObjects
 
 		public bool CanMove(MapPawn pawn, int steps)
 		{
-			Debug.Log("Пешка может ходить на " + steps + " шагов?");
-			bool canMove = false;
-			List<Vector3> way = new List<Vector3>();
-			Cell to = new Cell();
-
-			switch (pawn.location)
+			int end = GetRealIndex(0, pawn.playerPosition);
+			Trace trace = new Trace(new List<Vector3>(), pawn.trace?.from, null);
+			int iFrom = cells.FindIndex(c => c.pawn == pawn);
+			int iTo = (iFrom + steps);
+			bool canMove = true;
+			for (int i = iFrom + 1; i <= iTo && canMove; i++)
 			{
-				case Location.Origin:
-					canMove = steps == 6;
-					if (canMove)
-					{
-						to = cells[GetRealIndex(0, pawn.playerPosition)];
-						canMove = to.CanOccupy(pawn);
-						way.Add(to.position);
-					}
-					break;
-
-				case Location.Circle:
-					int iFrom = cells.FindIndex(c => c.pawn == pawn) + 1;
-					int iTo = (iFrom + steps);
-					canMove = true;
-					for (int i = iFrom; i < iTo && canMove; i++)
-					{
-						to = cells[i%cells.Count];
-						canMove = to.CanOccupy(pawn);
-						way.Add(to.position);
-					}
-					Debug.Log("Поиск ячеек от " + iFrom + " до " + iTo);
-					break;
+				if (pawn.inGame && (end == iFrom || i - 1 == end))
+					return home.CanMove(pawn, iTo - i + 1, trace);
+				trace.to = cells[i % cells.Count];
+				canMove = trace.to.CanOccupy(pawn);
+				trace.way.Add(trace.to.position);
 			}
 
 			if (canMove)
 			{
-				pawn.trace = new Trace(way, pawn.trace?.from, to);
+				pawn.trace = trace;
 				pawn.canMove = canMove;
-				Debug.Log("Пешка может ходить.");
 			}
 			return canMove;
 		}
 
+		public bool CanMoveBack(MapPawn pawn, int steps, Trace trace)
+		{
+			int iFrom = cells.Count + GetRealIndex(0, pawn.playerPosition);
+			int iTo = (iFrom - steps);
+			bool canMove = true;
+			for (int i = iFrom; i > iTo && canMove; i--)
+			{
+				trace.to = cells[i % cells.Count];
+				canMove = trace.to.CanOccupy(pawn);
+				trace.way.Add(trace.to.position);
+			}
+
+			if (canMove)
+			{
+				pawn.trace = trace;
+				pawn.canMove = canMove;
+			}
+			return canMove;
+		}
+
+		public Cell GetCell(int cellNumber, PlayerPosition playerPosition)
+		{
+			return cells[GetRealIndex(cellNumber, playerPosition)];
+		}
 
 		/// <summary>
 		/// Возвращает индекс ячейки относительно позиции игрока

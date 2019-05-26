@@ -18,7 +18,7 @@ namespace Map.MapObjects
 
 		public bool CanOccupy(MapPawn pawn)
 		{
-			return this.pawn == null;
+			return this.pawn == null || this.pawn.Equals(pawn);
 			//return !(this.pawn?.playerPosition == pawn.playerPosition);
 		}
 	}

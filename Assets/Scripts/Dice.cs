@@ -41,7 +41,6 @@ public class Dice : MonoBehaviour
 			if (GameController.instance.DebugDiceNumber > 0)
 				number = GameController.instance.DebugDiceNumber;
 			textNumber.text = number.ToString();
-			Debug.Log("Игрок кинул кубик. Выпало число " + number);
 			GameController.instance.CanMovePawns(number);
 		}
 	}

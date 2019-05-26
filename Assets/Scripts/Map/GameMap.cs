@@ -8,8 +8,16 @@ namespace Map
 
 	public class GameMap
 	{
-		private Origin origin = new Origin();
-		private Circle circle = new Circle();
+		private Circle circle;
+		private Origin origin;
+		private Home home;
+
+		public GameMap()
+		{
+			circle = new Circle();
+			origin = new Origin(circle);
+			home = new Home(circle);
+		}
 
 		public Vector3 GetOriginPosition(PlayerPosition playerPosition)
 		{
@@ -18,12 +26,23 @@ namespace Map
 
 		public bool CanMove(MapPawn pawn, int steps)
 		{
-			return circle.CanMove(pawn, steps);
+			switch (pawn.location)
+			{
+				case Location.Origin:
+					return origin.CanMove(pawn, steps);
+				case Location.Circle:
+					return circle.CanMove(pawn, steps);
+				case Location.Home:
+					return home.CanMove(pawn, steps);
+				default:
+					return false;
+			}
 		}
 	}
 
 	public interface MapPawn
 	{
+		bool inGame { get; set; }
 		bool canMove { get; set; }
 		Trace trace { get; set; }
 		// Расположение фишки на карте
@@ -52,6 +71,7 @@ namespace Map
 	public enum Location
 	{
 		Origin,
-		Circle
+		Circle,
+		Home
 	}
 }

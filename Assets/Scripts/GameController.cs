@@ -8,6 +8,7 @@ public class GameController : MonoBehaviour
 {
 	public float gameSpeed = 10; // Скорость игры
 	public GameStates gameState = GameStates.RollDice; // Состояние игры
+	[Range(1, 4)]
 	public int countPlayers = 4; // Количество игроков
 	public int currentPlayer = 0;
 	public static GameController instance = null; // Статичный экземпляр контроллера игры
@@ -72,13 +73,13 @@ public class GameController : MonoBehaviour
 			if (!players[key].IsPawnsEndMove())
 				return;
 		}
-		NextTurn();
+		if (gameState == GameStates.WalkPawn)
+			NextTurn();
 	}
 }
 
 public enum GameStates
 {
 	RollDice,
-	ChoosePawn,
 	WalkPawn
 }
