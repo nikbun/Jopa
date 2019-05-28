@@ -60,6 +60,8 @@ namespace Map
 		PlayerPosition playerPosition { get; }
 
 		void Shift();
+
+		void SetTrace(bool canMove, Trace trace = null);
 	}
 
 	/// <summary>
@@ -71,8 +73,10 @@ namespace Map
 		public Cell from;
 		public Cell to;
 
-		public Trace(List<Vector3> way, Cell from, Cell to)
+		public Trace(List<Vector3> way = null, Cell from = null, Cell to = null)
 		{
+			if (way == null)
+				way = new List<Vector3>();
 			this.way = way;
 			this.from = from;
 			this.to = to;

@@ -80,4 +80,10 @@ public class Pawn : MonoBehaviour, MapPawn
 			hits[0].transform.GetComponent<MapPawn>().Shift();
 		}
 	}
+
+	public void SetTrace(bool canMove, Trace trace = null)
+	{
+		this.canMove = canMove;
+		this.trace = trace;
+	}
 }

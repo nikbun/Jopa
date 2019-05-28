@@ -29,53 +29,36 @@ namespace Map.MapObjects
 			shift.Add(PlayerPosition.Right, 42);
 		}
 
-		public bool CanMove(MapPawn pawn, int steps)
+		public bool CanMove(MapPawn pawn, int steps, Trace trace = null, bool back = false)
 		{
-			int end = GetRealIndex(0, pawn.playerPosition);
-			Trace trace = new Trace(new List<Vector3>(), pawn.trace?.from, null);
-			int iFrom = cells.FindIndex(c => c.pawn == pawn);
-			int iTo = (iFrom + steps);
+			if (trace == null)
+				trace = new Trace(from: pawn.trace.from);
+			int end = GetIndex(0, pawn.playerPosition);
+			int index = back?end+1:cells.FindIndex(c => c.pawn == pawn);
 			bool canMove = true;
-			for (int i = iFrom + 1; i <= iTo && canMove; i++)
+
+			while (canMove && steps > 0)
 			{
-				if (pawn.inGame && (end == iFrom || i - 1 == end))
-					return home.CanMove(pawn, iTo - i + 1, trace);
-				trace.to = cells[i % cells.Count];
-				canMove = trace.to.CanOccupy(pawn, --steps <= 0);
-				trace.way.Add(trace.to.position);
+				if (pawn.inGame && index == end && !back)
+					return home.CanMove(pawn, steps, trace);
+				if (back)
+					index = --index + cells.Count;
+				else
+					index++;
+				index %= cells.Count;
+				var cell = cells[index];
+				canMove = cell.CanOccupy(pawn, steps == 1);
+				trace = UpdateTrace(cell, trace);
+				steps--;
 			}
 
-			if (canMove)
-			{
-				pawn.trace = trace;
-				pawn.canMove = canMove;
-			}
-			return canMove;
-		}
-
-		public bool CanMoveBack(MapPawn pawn, int steps, Trace trace)
-		{
-			int iFrom = cells.Count + GetRealIndex(0, pawn.playerPosition);
-			int iTo = (iFrom - steps);
-			bool canMove = true;
-			for (int i = iFrom; i > iTo && canMove; i--)
-			{
-				trace.to = cells[i % cells.Count];
-				canMove = trace.to.CanOccupy(pawn, --steps <= 0);
-				trace.way.Add(trace.to.position);
-			}
-
-			if (canMove)
-			{
-				pawn.trace = trace;
-				pawn.canMove = canMove;
-			}
+			pawn.SetTrace(canMove, canMove?trace:null);
 			return canMove;
 		}
 
 		public Cell GetCell(int cellNumber, PlayerPosition playerPosition)
 		{
-			return cells[GetRealIndex(cellNumber, playerPosition)];
+			return cells[GetIndex(cellNumber, playerPosition)];
 		}
 
 		/// <summary>
@@ -84,9 +67,16 @@ namespace Map.MapObjects
 		/// <param name="index"> Индекс игрока </param>
 		/// <param name="playerPosition"> Позиция игрока </param>
 		/// <returns> Настоящий индекс </returns>
-		public int GetRealIndex(int index, PlayerPosition playerPosition)
+		public int GetIndex(int index, PlayerPosition playerPosition)
 		{
 			return (index + shift[playerPosition]) % cells.Count;
+		}
+
+		private Trace UpdateTrace(Cell cell, Trace trace)
+		{
+			trace.to = cell;
+			trace.way.Add(cell.position);
+			return trace;
 		}
 	}
 }

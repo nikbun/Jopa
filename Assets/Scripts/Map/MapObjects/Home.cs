@@ -63,7 +63,7 @@ namespace Map.MapObjects
 					trace.way.Add(trace.to.position);
 				}
 				if (iBack - end > 0)
-					return circle.CanMoveBack(pawn, iBack - end, trace);
+					return circle.CanMove(pawn, iBack - end, trace, true);
 			}
 
 			if (canMove)
