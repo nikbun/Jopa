@@ -6,7 +6,7 @@ namespace Map.MapObjects
 	public class Home
 	{
 		public Circle circle;
-		private Dictionary<PlayerPosition, List<Cell>> dicCells = new Dictionary<PlayerPosition, List<Cell>>();
+		private Dictionary<PlayerPosition, List<Cell>> cells = new Dictionary<PlayerPosition, List<Cell>>();
 		
 		public Home(Circle circle)
 		{
@@ -17,68 +17,57 @@ namespace Map.MapObjects
 			var lCells = new List<Cell>();
 			for (int z = -5; z <= -2; z++)
 				lCells.Add(new Cell(0, z, loc));
-			dicCells.Add(PlayerPosition.Bottom, lCells);
+			cells.Add(PlayerPosition.Bottom, lCells);
 			lCells = new List<Cell>();
 			for (int x = -5; x <= -2; x++)
 				lCells.Add(new Cell(x, 0, loc));
-			dicCells.Add(PlayerPosition.Left, lCells);
+			cells.Add(PlayerPosition.Left, lCells);
 			lCells = new List<Cell>();
 			for (int z = 5; z >= 2; z--)
 				lCells.Add(new Cell(0, z, loc));
-			dicCells.Add(PlayerPosition.Top, lCells);
+			cells.Add(PlayerPosition.Top, lCells);
 			lCells = new List<Cell>();
 			for (int x = 5; x >= 2; x--)
 				lCells.Add(new Cell(x, 0, loc));
-			dicCells.Add(PlayerPosition.Right, lCells);
+			cells.Add(PlayerPosition.Right, lCells);
 		}
 
 		public bool CanMove(MapPawn pawn, int steps, Trace trace = null)
 		{
-			var cells = dicCells[pawn.playerPosition];
-			int iFrom = 0;
 			if (trace == null)
-			{
-				trace = new Trace(new List<Vector3>(), pawn.trace?.from, null);
-				iFrom = cells.FindIndex(c => c.pawn == pawn) + 1;
-			}
-			int end = GetEndNumber(cells);
-			int iTo = (iFrom + steps);
-			int iBack = iTo - end - 1;
+				trace = new Trace(from: pawn.trace?.from);
+			int end = GetEnd(pawn.playerPosition);
+			int index = cells[pawn.playerPosition].FindIndex(c => c.pawn == pawn);
 			bool canMove = true;
-
-			if (iFrom > end)
+			bool back = false;
+			if (index > end)
 				return false;
-			for (int i = iFrom; i < iTo && i <= end && canMove; i++)
+			while (canMove && steps > 0)
 			{
-				trace.to = cells[i % cells.Count];
-				canMove = trace.to.CanOccupy(pawn);
-				trace.way.Add(trace.to.position);
-			}
-			if (iBack > 0)
-			{
-				for (int i=end-1; i>=end-iBack && i>=0 && canMove; i--)
-				{
-					trace.to = cells[i % cells.Count];
-					canMove = trace.to.CanOccupy(pawn);
-					trace.way.Add(trace.to.position);
-				}
-				if (iBack - end > 0)
-					return circle.CanMove(pawn, iBack - end, trace, true);
+				if (index == end)
+					back = true;
+				if (back && index == 0)
+					return circle.CanMove(pawn, steps, trace, true);
+				if (back)
+					index = --index + cells[pawn.playerPosition].Count;
+				else
+					index++;
+				index %= cells[pawn.playerPosition].Count;
+				var cell = cells[pawn.playerPosition][index];
+				canMove = cell.CanOccupy(pawn, steps == 1);
+				trace.UpdateTrace(cell);
+				steps--;
 			}
 
-			if (canMove)
-			{
-				pawn.trace = trace;
-				pawn.canMove = canMove;
-			}
+			pawn.SetTrace(canMove, canMove ? trace : null);
 			return canMove;
 		}
 
-		private int GetEndNumber(List<Cell> cells)
+		private int GetEnd(PlayerPosition playerPosition)
 		{
 			for(int i = 3; i > 0; i--)
 			{
-				if (cells[i].pawn == null)
+				if (cells[playerPosition][i].pawn == null)
 					return i;
 			}
 			return 0;

@@ -32,7 +32,7 @@ namespace Map.MapObjects
 		public bool CanMove(MapPawn pawn, int steps, Trace trace = null, bool back = false)
 		{
 			if (trace == null)
-				trace = new Trace(from: pawn.trace.from);
+				trace = new Trace(from: pawn.trace?.from);
 			int end = GetIndex(0, pawn.playerPosition);
 			int index = back?end+1:cells.FindIndex(c => c.pawn == pawn);
 			bool canMove = true;
@@ -48,7 +48,7 @@ namespace Map.MapObjects
 				index %= cells.Count;
 				var cell = cells[index];
 				canMove = cell.CanOccupy(pawn, steps == 1);
-				trace = UpdateTrace(cell, trace);
+				trace.UpdateTrace(cell);
 				steps--;
 			}
 
@@ -70,13 +70,6 @@ namespace Map.MapObjects
 		public int GetIndex(int index, PlayerPosition playerPosition)
 		{
 			return (index + shift[playerPosition]) % cells.Count;
-		}
-
-		private Trace UpdateTrace(Cell cell, Trace trace)
-		{
-			trace.to = cell;
-			trace.way.Add(cell.position);
-			return trace;
 		}
 	}
 }

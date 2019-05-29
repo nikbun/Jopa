@@ -45,7 +45,7 @@ public class Pawn : MonoBehaviour, MapPawn
 
 		if (!inGame && location == Location.Circle)
 			inGame = true;
-		trace.UpdateTrace(this, true);
+		trace.ResetTrace(this, true);
 		move = false;
 		GameController.instance.EndTurn();
 	}
@@ -64,9 +64,10 @@ public class Pawn : MonoBehaviour, MapPawn
 	public void Shift()
 	{
 		var pos = player.gameMap.GetJopaPosition(playerPosition);
-		trace.UpdateTrace();
+		trace.ResetTrace();
 		trace.way.Add(pos);
 		location = Location.Jopa;
+		inGame = false;
 		move = true;
 		StartCoroutine(Move(false));
 	}
@@ -84,6 +85,6 @@ public class Pawn : MonoBehaviour, MapPawn
 	public void SetTrace(bool canMove, Trace trace = null)
 	{
 		this.canMove = canMove;
-		this.trace = trace;
+		this.trace = trace!=null?trace:this.trace;
 	}
 }

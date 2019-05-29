@@ -82,7 +82,13 @@ namespace Map
 			this.to = to;
 		}
 
-		public void UpdateTrace(MapPawn pawn = null, bool updateLocation = false)
+		public void UpdateTrace(Cell cell)
+		{
+			to = cell;
+			way.Add(cell.position);
+		}
+
+		public void ResetTrace(MapPawn pawn = null, bool updateLocation = false)
 		{
 			if (from != null && pawn != null)
 				from.pawn = null;
