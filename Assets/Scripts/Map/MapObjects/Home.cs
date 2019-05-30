@@ -6,7 +6,7 @@ namespace Map.MapObjects
 	public class Home
 	{
 		public Circle circle;
-		private Dictionary<PlayerPosition, List<Cell>> cells = new Dictionary<PlayerPosition, List<Cell>>();
+		private Dictionary<PlayerPosition, List<ICell>> cells = new Dictionary<PlayerPosition, List<ICell>>();
 		
 		public Home(Circle circle)
 		{
@@ -14,19 +14,19 @@ namespace Map.MapObjects
 			circle.home = this;
 
 			var loc = Location.Home;
-			var lCells = new List<Cell>();
+			var lCells = new List<ICell>();
 			for (int z = -5; z <= -2; z++)
 				lCells.Add(new Cell(0, z, loc));
 			cells.Add(PlayerPosition.Bottom, lCells);
-			lCells = new List<Cell>();
+			lCells = new List<ICell>();
 			for (int x = -5; x <= -2; x++)
 				lCells.Add(new Cell(x, 0, loc));
 			cells.Add(PlayerPosition.Left, lCells);
-			lCells = new List<Cell>();
+			lCells = new List<ICell>();
 			for (int z = 5; z >= 2; z--)
 				lCells.Add(new Cell(0, z, loc));
 			cells.Add(PlayerPosition.Top, lCells);
-			lCells = new List<Cell>();
+			lCells = new List<ICell>();
 			for (int x = 5; x >= 2; x--)
 				lCells.Add(new Cell(x, 0, loc));
 			cells.Add(PlayerPosition.Right, lCells);

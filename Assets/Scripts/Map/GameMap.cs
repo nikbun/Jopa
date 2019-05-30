@@ -70,10 +70,10 @@ namespace Map
 	public class Trace
 	{
 		public List<Vector3> way;
-		public Cell from;
-		public Cell to;
+		public ICell from;
+		public ICell to;
 
-		public Trace(List<Vector3> way = null, Cell from = null, Cell to = null)
+		public Trace(List<Vector3> way = null, ICell from = null, ICell to = null)
 		{
 			if (way == null)
 				way = new List<Vector3>();
@@ -82,10 +82,10 @@ namespace Map
 			this.to = to;
 		}
 
-		public void UpdateTrace(Cell cell)
+		public void UpdateTrace(ICell cell, bool lastCell = false)
 		{
 			to = cell;
-			way.Add(cell.position);
+			way.AddRange(cell.GetWay(lastCell));
 		}
 
 		public void ResetTrace(MapPawn pawn = null, bool updateLocation = false)

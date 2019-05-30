@@ -8,7 +8,7 @@ namespace Map.MapObjects
 	{
 		public Home home;
 
-		private List<Cell> cells = new List<Cell>();
+		private List<ICell> cells = new List<ICell>();
 		private Dictionary<PlayerPosition, int> shift = new Dictionary<PlayerPosition, int>();
 
 		public Circle()
@@ -22,6 +22,11 @@ namespace Map.MapObjects
 				cells.Add(new Cell(x, 6, loc));
 			for (int y = 6; y > -6; y--)
 				cells.Add(new Cell(6, y, loc));
+
+			initCut(8,	16,	new List<Vector3>() { new Vector3(-2, 0, -4.5f), new Vector3(-4.5f, 0, -2) });
+			initCut(20, 28, new List<Vector3>() { new Vector3(-4.5f, 0, 2f), new Vector3(-2, 0, 4.5f) });
+			initCut(32, 40, new List<Vector3>() { new Vector3(2f, 0, 4.5f), new Vector3(4.5f, 0, 2f) });
+			initCut(44, 4,	new List<Vector3>() { new Vector3(4.5f, 0, -2f), new Vector3(2f, 0, -4.5f) });
 
 			shift.Add(PlayerPosition.Bottom, 6);
 			shift.Add(PlayerPosition.Left, 18);
@@ -48,7 +53,7 @@ namespace Map.MapObjects
 				index %= cells.Count;
 				var cell = cells[index];
 				canMove = cell.CanOccupy(pawn, steps == 1);
-				trace.UpdateTrace(cell);
+				trace.UpdateTrace(cell, steps == 1);
 				steps--;
 			}
 
@@ -56,7 +61,7 @@ namespace Map.MapObjects
 			return canMove;
 		}
 
-		public Cell GetCell(int cellNumber, PlayerPosition playerPosition)
+		public ICell GetCell(int cellNumber, PlayerPosition playerPosition)
 		{
 			return cells[GetIndex(cellNumber, playerPosition)];
 		}
@@ -70,6 +75,22 @@ namespace Map.MapObjects
 		public int GetIndex(int index, PlayerPosition playerPosition)
 		{
 			return (index + shift[playerPosition]) % cells.Count;
+		}
+
+		private void initCut(int start, int end, List<Vector3> cut)
+		{
+			var startCell = cells[start];
+			var endCell = cells[end];
+			CellCut sCellCut = new CellCut(startCell, cut);
+			List<Vector3> cutReverse = new List<Vector3>();
+			foreach (var pos in cut)
+			{
+				cutReverse.Add(pos);
+			}
+			cutReverse.Reverse();
+			CellCut eCellCut = new CellCut(endCell, cutReverse, sCellCut);
+			cells[start] = sCellCut;
+			cells[end] = eCellCut;
 		}
 	}
 }

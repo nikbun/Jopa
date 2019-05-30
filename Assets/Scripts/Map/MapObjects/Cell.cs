@@ -1,11 +1,12 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 
 namespace Map.MapObjects
 {
-	public class Cell
+	public class Cell:ICell
 	{
-		public MapPawn pawn;
-		public Location location;
+		public MapPawn pawn { get; set; }
+		public Location location { get; set; }
 		public Vector3 position { get; set; }
 
 		public Cell(){}
@@ -20,6 +21,11 @@ namespace Map.MapObjects
 		{
 			return this.pawn == null || this.pawn.Equals(pawn)
 				|| lastCell && this.pawn?.playerPosition != pawn.playerPosition;
+		}
+
+		public List<Vector3> GetWay(bool lastCell = false)
+		{
+			return new List<Vector3>() { position };
 		}
 	}
 }

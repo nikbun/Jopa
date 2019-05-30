@@ -17,7 +17,7 @@ namespace Map.MapObjects
 			cells.Add(PlayerPosition.Right, new Cell(1f, 0, loc));
 		}
 
-		public override Cell GetTarget(MapPawn pawn, out bool canOccupy)
+		public override ICell GetTarget(MapPawn pawn, out bool canOccupy)
 		{
 			canOccupy = true;
 			return origin.GetCell(pawn.playerPosition);

@@ -6,35 +6,29 @@ namespace Map.MapObjects
 {
 	abstract class AStackCells
 	{
-		public Dictionary<PlayerPosition, Cell> cells = new Dictionary<PlayerPosition, Cell>();
+		public Dictionary<PlayerPosition, ICell> cells = new Dictionary<PlayerPosition, ICell>();
 
 		public bool CanMove(MapPawn pawn, int steps)
 		{
-			var trace = new Trace(new List<Vector3>(), pawn.trace?.from, null);
+			var trace = new Trace(from:pawn.trace?.from);
 			if (steps != 6)
 				return false;
 			bool canMove;
-			trace.to = GetTarget(pawn, out canMove);
-			trace.way.Add(trace.to.position);
-
-			if (canMove) // TODO Стоит переделать метод
-			{
-				pawn.trace = trace;
-				pawn.canMove = canMove;
-			}
+			trace.UpdateTrace(GetTarget(pawn, out canMove));
+			pawn.SetTrace(canMove, canMove ? trace : null);
 			return canMove;
 		}
 
 		public Vector3 GetPosition(PlayerPosition playerPosition)
 		{
-			return GetCell(playerPosition).position;
+			return GetCell(playerPosition).GetWay()[0];
 		}
 
-		public Cell GetCell(PlayerPosition playerPosition)
+		public ICell GetCell(PlayerPosition playerPosition)
 		{
 			return cells[playerPosition];
 		}
 
-		public abstract Cell GetTarget(MapPawn pawn, out bool canOccupy);
+		public abstract ICell GetTarget(MapPawn pawn, out bool canOccupy);
 	}
 }

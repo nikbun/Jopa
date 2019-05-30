@@ -18,7 +18,7 @@ namespace Map.MapObjects
 			cells.Add(PlayerPosition.Right, new Cell(7.2f, 0, loc));
 		}
 
-		public override Cell GetTarget(MapPawn pawn, out bool canOccupy)
+		public override ICell GetTarget(MapPawn pawn, out bool canOccupy)
 		{
 			var cell = circle.GetCell(0, pawn.playerPosition);
 			canOccupy = cell.CanOccupy(pawn, true);
