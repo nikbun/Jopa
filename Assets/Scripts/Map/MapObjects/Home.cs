@@ -65,12 +65,12 @@ namespace Map.MapObjects
 
 		private int GetEnd(PlayerPosition playerPosition)
 		{
-			for(int i = 3; i > 0; i--)
+			for(int i = 3; i >= 0; i--)
 			{
 				if (cells[playerPosition][i].pawn == null)
 					return i;
 			}
-			return 0;
+			return -1;
 		}
 	}
 }

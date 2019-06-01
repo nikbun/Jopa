@@ -30,7 +30,7 @@ namespace Map.MapObjects
 
 		public bool CanOccupy(MapPawn pawn, bool lastCell = false)
 		{
-			return lastCell && tolchek.CanMove(0);
+			return !lastCell || lastCell && tolchek.CanMove(0);
 		}
 
 		public List<Vector3> GetWay(bool lastCell = false)

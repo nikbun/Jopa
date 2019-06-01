@@ -43,7 +43,7 @@ namespace Map
 		{
 			if (from != null)
 			{
-				if (pawn == from.pawn)
+				if (pawn == from.pawn || from.pawn == null)// TODO Костыль для срезов
 					from.pawn = null;
 			}
 			if (!saveFrom)
