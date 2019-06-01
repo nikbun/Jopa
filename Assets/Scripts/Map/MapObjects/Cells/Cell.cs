@@ -8,9 +8,6 @@ namespace Map.MapObjects
 		public MapPawn pawn { get; set; }
 		public Location location { get; set; }
 		public Vector3 position { get; set; }
-
-		public Cell(){}
-
 		public Cell(float x, float z, Location location)
 		{
 			position = new Vector3(x, 0, z);

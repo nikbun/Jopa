@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Map.MapObjects
 {
-	class Jopa : AStackCells
+	class Jopa : AStack
 	{
 		public Origin origin;
 

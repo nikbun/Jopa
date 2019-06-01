@@ -15,9 +15,10 @@ public class GameController : MonoBehaviour
 	public List<GameObject> instancePlayers; // Экземпляры игроков
 	public Dictionary<PlayerPosition, Player> players = new Dictionary<PlayerPosition, Player>(); // Скрипты игроков для управления игроками
 	public GameMap gameMap = new GameMap(); // Игровая карта
-	
-	// TODO Удалить или обернуть директиву дебага если
+
+#if UNITY_EDITOR
 	public int DebugDiceNumber = 0;
+#endif
 
 	private void Awake()
 	{

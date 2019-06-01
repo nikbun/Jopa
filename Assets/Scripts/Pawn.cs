@@ -7,7 +7,8 @@ using Map.MapObjects;
 public class Pawn : MonoBehaviour, MapPawn
 {
 	// Визуально показывает, что может ходить
-	public SpriteRenderer outline; 
+	public SpriteRenderer outline;
+	public int number;
 	public Location location { get; set; }
 	public PlayerPosition playerPosition { get { return player.playerPosition; } }
 
@@ -63,13 +64,23 @@ public class Pawn : MonoBehaviour, MapPawn
 
 	public void Shift()
 	{
-		var pos = player.gameMap.GetJopaPosition(playerPosition);
-		trace.ResetTrace();
-		trace.way.Add(pos);
-		location = Location.Jopa;
-		inGame = false;
-		move = true;
-		StartCoroutine(Move(false));
+		if (location == Location.Tolchok)
+		{
+			trace.ResetTrace(saveFrom:true);
+			trace = player.gameMap.GetTolchokTraceToNext(this);
+			move = true;
+			StartCoroutine(Move(true));
+		}
+		else
+		{
+			var pos = player.gameMap.GetJopaPosition(playerPosition);
+			trace.ResetTrace(this);
+			trace.way.Add(pos);
+			location = Location.Jopa;
+			inGame = false;
+			move = true;
+			StartCoroutine(Move(false));
+		}
 	}
 
 	private void HitOtherPawn(Vector3 target)

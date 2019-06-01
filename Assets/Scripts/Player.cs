@@ -27,6 +27,7 @@ public class Player : MonoBehaviour
 			pawn.transform.SetParent(transform);
 			var sPawn = pawn.GetComponent<Pawn>();
 			sPawn.player = this;
+			sPawn.number = i;
 			pawns.Add(sPawn);
 		}
 	}

@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace Map.MapObjects
 {
-	class Origin : AStackCells
+	class Origin : AStack
 	{
 		public Circle circle;
 

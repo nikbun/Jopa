@@ -3,6 +3,10 @@ using System.Collections.Generic;
 
 namespace Map.MapObjects
 {
+	/// <summary>
+	/// Клетка среза
+	/// Если пешка попадает на нее ее переносит на другой конец среза
+	/// </summary>
 	public class CellCut : ICell
 	{
 		public MapPawn pawn { get { return startCell.pawn; } set { endCell.SetPawn(value); } }
@@ -22,6 +26,10 @@ namespace Map.MapObjects
 				endCell.SetEndCell(this);
 		}
 
+		/// <summary>
+		/// Устанавливает клетку в конец среза
+		/// </summary>
+		/// <param name="endCell">Конечная клетка среза</param>
 		public void SetEndCell(CellCut endCell)
 		{
 			this.endCell = endCell;
@@ -32,6 +40,12 @@ namespace Map.MapObjects
 			return startCell.CanOccupy(pawn) && (!lastCell || endCell.CanOccupyEnd(pawn));
 		}
 
+		/// <summary>
+		/// Проверка на незанятость конечной ячейки
+		/// Необходима, для избежания зациклености
+		/// </summary>
+		/// <param name="pawn"></param>
+		/// <returns></returns>
 		public bool CanOccupyEnd(MapPawn pawn)
 		{
 			return startCell.CanOccupy(pawn, true);
@@ -48,6 +62,12 @@ namespace Map.MapObjects
 			return way;
 		}
 
+		/// <summary>
+		/// Устанавливает пешку в начальную клетку
+		/// Так же решает проблемы зацикленности
+		/// Устанавливает пешку в начало у конечной клетки
+		/// </summary>
+		/// <param name="pawn"></param>
 		public void SetPawn(MapPawn pawn)
 		{
 			startCell.pawn = pawn;
