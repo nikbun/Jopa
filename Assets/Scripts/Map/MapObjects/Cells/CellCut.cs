@@ -37,7 +37,7 @@ namespace Map.MapObjects
 
 		public bool CanOccupy(MapPawn pawn, bool lastCell = false)
 		{
-			return startCell.CanOccupy(pawn) && (!lastCell || endCell.CanOccupyEnd(pawn));
+			return (lastCell || startCell.CanOccupy(pawn)) && (!lastCell || endCell.CanOccupyEnd(pawn));
 		}
 
 		/// <summary>

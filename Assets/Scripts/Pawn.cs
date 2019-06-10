@@ -31,7 +31,7 @@ public class Pawn : MonoBehaviour, MapPawn
 		{
 			player.OffCanMove();
 			move = true;
-			StartCoroutine(Move(location != Location.Jopa));
+			StartCoroutine(Move(location != Location.Jopa && trace.to?.location != Location.Jopa));
 		}
 	}
 
@@ -39,7 +39,7 @@ public class Pawn : MonoBehaviour, MapPawn
 	{
 		for(int i = 0; i < trace.way.Count; i++)
 		{
-			if (withHit && i + 1 == trace.way.Count)
+			if (withHit)
 				HitOtherPawn(trace.way[i]);
 			yield return StartCoroutine( MoveToPoint(trace.way[i]));
 		}
