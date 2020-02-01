@@ -15,10 +15,7 @@ public class GameController : MonoBehaviour
 	public List<GameObject> instancePlayers; // Экземпляры игроков
 	public Dictionary<PlayerPosition, Player> players = new Dictionary<PlayerPosition, Player>(); // Скрипты игроков для управления игроками
 	public GameMap gameMap = new GameMap(); // Игровая карта
-
-#if UNITY_EDITOR
-	public int DebugDiceNumber = 0;
-#endif
+	public Dice dice;
 
 	private void Awake()
 	{
@@ -30,6 +27,7 @@ public class GameController : MonoBehaviour
 
 	void Start() //Выставение фишек на начальные позиции 
 	{
+		dice.RollResult += CanMovePawns;
 		InitPlayers();
 	}
 
@@ -55,6 +53,7 @@ public class GameController : MonoBehaviour
 	{
 		currentPlayer = (++currentPlayer)%countPlayers;
 		gameState = GameStates.RollDice;
+		dice.SetCanRoll(true);
 		return currentPlayer;
 	}
 
