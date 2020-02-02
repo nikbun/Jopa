@@ -10,25 +10,24 @@ public class Player : MonoBehaviour
 {
 	public PlayerPosition playerPosition;
 	public GameObject instancePawns;
-	
-	List<Pawn> m_Pawns = new List<Pawn>();
 
 	public delegate void EndTurnDeleg();
 	public event EndTurnDeleg EndTurn;
 
+	List<Pawn> m_Pawns = new List<Pawn>();
+
 	void Start()
 	{
-		initPawns();
+		InitPawns();
 	}
 
-	void initPawns()
+	void InitPawns()
 	{
 		for (int i = 0; i < 4; i++)
 		{
 			var pawn = Instantiate(instancePawns, transform.position, Quaternion.Euler(90f, 0, 0));
 			pawn.transform.SetParent(transform);
 			var sPawn = pawn.GetComponent<Pawn>();
-			sPawn.number = i;
 			sPawn.playerPosition = playerPosition;
 			sPawn.StartMove += OffCanMove;
 			sPawn.StopMove += EndTurn.Invoke;
@@ -36,27 +35,39 @@ public class Player : MonoBehaviour
 		}
 	}
 
-	public bool CanMovePawns(int steps)
+	/// <summary>
+	/// Может ли игрок начать ход
+	/// </summary>
+	/// <param name="diceResult">Результат сброса кубика</param>
+	/// <returns></returns>
+	public bool CanStartMove(int diceResult)
 	{
 		bool canMove = false;
 		foreach (var pawn in m_Pawns)
 		{
-			canMove = GameData.instance.map.CanMove(pawn, steps) || canMove; 
+			canMove = GameData.instance.map.CanMove(pawn, diceResult) || canMove; 
 		}
 		return canMove;
 	}
 
-	public void OffCanMove()
+	/// <summary>
+	/// Закончил ли игрок ход
+	/// </summary>
+	/// <returns></returns>
+	public bool IsEndMove()
+	{
+		return !m_Pawns.Exists(p => p.IsMoving());
+	}
+
+	/// <summary>
+	/// Отключить подсветку фишек, которыми можно ходить
+	/// </summary>
+	void OffCanMove()
 	{
 		foreach (var pawn in m_Pawns)
 		{
-			pawn.canMove = false;
+			pawn.canStartMoving = false;
 		}
-	}
-
-	public bool IsPawnsEndMove()
-	{
-		return !m_Pawns.Exists(p => p.move);
 	}
 }
 

@@ -6,38 +6,37 @@ using Map.MapObjects;
 
 public class Pawn : MonoBehaviour, MapPawn
 {
-	// Визуально показывает, что может ходить
-	public SpriteRenderer outline;
-	public int number;
-	public Location location { get; set; }
-	public PlayerPosition playerPosition { get; set; }
-	public bool canMove { get { return outline.enabled; } set { outline.enabled = value; } }
-	public bool inGame { get; set; }
-	public Trace trace { get; set; }
-
-	public bool move = false;
+	public SpriteRenderer outline; // Подсветка, в случае, если фишкой можно ходить
 
 	public delegate void PawnMove();
 	public event PawnMove StartMove;
 	public event PawnMove StopMove;
 
+	bool m_Moving = false;
+
+	public Location location { get; set; }
+	public PlayerPosition playerPosition { get; set; }
+	public bool canStartMoving { get { return outline.enabled; } set { outline.enabled = value; } }
+	public bool inGame { get; set; }
+	public Trace trace { get; set; }
+
 	void Start()
 	{
 		location = Location.Origin;
-		canMove = false;
+		canStartMoving = false;
 	}
 
-	private void OnMouseDown()
+	void OnMouseDown()
 	{
-		if (canMove)
+		if (canStartMoving)
 		{
 			StartMove?.Invoke();
-			move = true;
+			m_Moving = true;
 			StartCoroutine(Move(location != Location.Jopa && trace.to?.location != Location.Jopa));
 		}
 	}
 
-	private IEnumerator Move(bool withHit = true)
+	IEnumerator Move(bool withHit = true)
 	{
 		for(int i = 0; i < trace.way.Count; i++)
 		{
@@ -49,7 +48,7 @@ public class Pawn : MonoBehaviour, MapPawn
 		if (!inGame && location == Location.Circle)
 			inGame = true;
 		trace.ResetTrace(this, true);
-		move = false;
+		m_Moving = false;
 		StopMove?.Invoke();
 	}
 
@@ -67,7 +66,7 @@ public class Pawn : MonoBehaviour, MapPawn
 	public void Shift()
 	{
 		StartMove?.Invoke();
-		move = true;
+		m_Moving = true;
 		if (location == Location.Tolchok)
 		{
 			trace.ResetTrace(saveFrom:true);
@@ -97,7 +96,12 @@ public class Pawn : MonoBehaviour, MapPawn
 
 	public void SetTrace(bool canMove, Trace trace = null)
 	{
-		this.canMove = canMove;
+		this.canStartMoving = canMove;
 		this.trace = trace!=null?trace:this.trace;
+	}
+
+	public bool IsMoving() 
+	{
+		return m_Moving;
 	}
 }

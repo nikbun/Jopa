@@ -6,24 +6,53 @@ using System.Collections.Generic;
 
 public class GameController : MonoBehaviour
 {
-	public float gameSpeed = 10f; // Скорость игры. Нельзя поменять в процессе игры
+	public float gameSpeed = 10f; // Скорость передвижения фишек
 	[Range(1, 4)]
 	public int countPlayers = 4;
-	public int currentPlayer = 0;
 	public List<GameObject> instancePlayers; // Экземпляры игроков
 	public Dice dice;
 
+	int m_CurrentPlayer = 0;
 	Dictionary<PlayerPosition, Player> m_Players = new Dictionary<PlayerPosition, Player>(); // Скрипты управления игроками
 
 	void Start() 
 	{
 		new GameData(new GameMap(), gameSpeed);
-		dice.RollResult += CanMovePawns;
+		dice.RollResult += StartTurn;
 		InitPlayers();
 	}
 
+	void Update() 
+	{
+		// Бросок кости
+		if (Input.GetKeyUp(KeyCode.Space))
+		{
+			dice.Roll();
+		}
+#if UNITY_EDITOR
+		// Бросок кости на определенное число
+		// Клавиши от 1 до 6
+		// Выброшенное число соответствует номеру клавиши
+		int num = -1;
+		if (Input.GetKeyUp(KeyCode.Alpha1))
+			num = 1;
+		if (Input.GetKeyUp(KeyCode.Alpha2))
+			num = 2;
+		if (Input.GetKeyUp(KeyCode.Alpha3))
+			num = 3;
+		if (Input.GetKeyUp(KeyCode.Alpha4))
+			num = 4;
+		if (Input.GetKeyUp(KeyCode.Alpha5))
+			num = 5;
+		if (Input.GetKeyUp(KeyCode.Alpha6))
+			num = 6;
+		if(num > 0)
+			dice.Roll(num);
+#endif
+	}
+
 	/// <summary>
-	/// Загружаем игроков на стартовые позиции
+	/// Устанавливаем игроков на стартовые позиции
 	/// </summary>
 	void InitPlayers()
 	{
@@ -38,18 +67,18 @@ public class GameController : MonoBehaviour
 		}
 	}
 
-	public void CanMovePawns(int steps)
+	void StartTurn(int diceResult)
 	{
-		bool canMove = m_Players[(PlayerPosition)currentPlayer].CanMovePawns(steps);
+		bool canMove = m_Players[(PlayerPosition)m_CurrentPlayer].CanStartMove(diceResult);
 		if (!canMove)
 			NextTurn();
 	}
 
-	public void EndTurn()
+	void EndTurn()
 	{
 		foreach (var key in m_Players.Keys)
 		{
-			if (!m_Players[key].IsPawnsEndMove())
+			if (!m_Players[key].IsEndMove())
 				return;
 		}
 		NextTurn();
@@ -58,11 +87,10 @@ public class GameController : MonoBehaviour
 	/// <summary>
 	/// Выбрать следующего игрока
 	/// </summary>
-	public int NextTurn()
+	void NextTurn()
 	{
-		currentPlayer = (++currentPlayer) % countPlayers;
-		dice.SetCanRoll(true);
-		return currentPlayer;
+		m_CurrentPlayer = (++m_CurrentPlayer) % countPlayers;
+		dice.UnlockRoll();
 	}
 }
 

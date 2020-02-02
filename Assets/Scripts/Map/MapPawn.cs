@@ -13,12 +13,18 @@
 		/// <summary>
 		/// Показывает игроку, что пешка может двигаться
 		/// </summary>
-		bool canMove { get; set; }
+		bool canStartMoving { get; set; }
+		/// <summary>
+		/// Путь движения фишки
+		/// </summary>
 		Trace trace { get; set; }
 		/// <summary>
 		///Локация карты в которой сейчас находиться пешка 
 		/// </summary>
 		Location location { get; set; }
+		/// <summary>
+		/// Позиция игрока
+		/// </summary>
 		PlayerPosition playerPosition { get; }
 		/// <summary>
 		/// Смещение пешки вызываеться, когда пешку смещает другая пешка
