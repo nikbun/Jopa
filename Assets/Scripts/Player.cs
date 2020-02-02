@@ -9,13 +9,15 @@ using UnityEngine;
 public class Player : MonoBehaviour 
 {
 	public PlayerPosition playerPosition;
-	public GameObject pawnInstance;
-	public List<Pawn> pawns = new List<Pawn>();
-	public GameMap gameMap;
+	public GameObject instancePawns;
+	
+	List<Pawn> m_Pawns = new List<Pawn>();
 
-	private void Start()
+	public delegate void EndTurnDeleg();
+	public event EndTurnDeleg EndTurn;
+
+	void Start()
 	{
-		gameMap = GameController.instance.gameMap;
 		initPawns();
 	}
 
@@ -23,28 +25,30 @@ public class Player : MonoBehaviour
 	{
 		for (int i = 0; i < 4; i++)
 		{
-			var pawn = Instantiate(pawnInstance, transform.position, Quaternion.Euler(90f, 0, 0));
+			var pawn = Instantiate(instancePawns, transform.position, Quaternion.Euler(90f, 0, 0));
 			pawn.transform.SetParent(transform);
 			var sPawn = pawn.GetComponent<Pawn>();
-			sPawn.player = this;
 			sPawn.number = i;
-			pawns.Add(sPawn);
+			sPawn.playerPosition = playerPosition;
+			sPawn.StartMove += OffCanMove;
+			sPawn.StopMove += EndTurn.Invoke;
+			m_Pawns.Add(sPawn);
 		}
 	}
 
 	public bool CanMovePawns(int steps)
 	{
 		bool canMove = false;
-		foreach (var pawn in pawns)
+		foreach (var pawn in m_Pawns)
 		{
-			canMove = gameMap.CanMove(pawn, steps) || canMove; 
+			canMove = GameData.instance.map.CanMove(pawn, steps) || canMove; 
 		}
 		return canMove;
 	}
 
 	public void OffCanMove()
 	{
-		foreach (var pawn in pawns)
+		foreach (var pawn in m_Pawns)
 		{
 			pawn.canMove = false;
 		}
@@ -52,7 +56,7 @@ public class Player : MonoBehaviour
 
 	public bool IsPawnsEndMove()
 	{
-		return !pawns.Exists(p => p.move);
+		return !m_Pawns.Exists(p => p.move);
 	}
 }
 

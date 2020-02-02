@@ -6,27 +6,18 @@ using System.Collections.Generic;
 
 public class GameController : MonoBehaviour
 {
-	public float gameSpeed = 10; // Скорость игры
-	public GameStates gameState = GameStates.RollDice; // Состояние игры
+	public float gameSpeed = 10f; // Скорость игры. Нельзя поменять в процессе игры
 	[Range(1, 4)]
-	public int countPlayers = 4; // Количество игроков
+	public int countPlayers = 4;
 	public int currentPlayer = 0;
-	public static GameController instance = null; // Статичный экземпляр контроллера игры
 	public List<GameObject> instancePlayers; // Экземпляры игроков
-	public Dictionary<PlayerPosition, Player> players = new Dictionary<PlayerPosition, Player>(); // Скрипты игроков для управления игроками
-	public GameMap gameMap = new GameMap(); // Игровая карта
 	public Dice dice;
 
-	private void Awake()
-	{
-		if (instance == null)
-			instance = this;
-		else if (instance != this)
-			Destroy(gameObject);
-	}
+	Dictionary<PlayerPosition, Player> m_Players = new Dictionary<PlayerPosition, Player>(); // Скрипты управления игроками
 
-	void Start() //Выставение фишек на начальные позиции 
+	void Start() 
 	{
+		new GameData(new GameMap(), gameSpeed);
 		dice.RollResult += CanMovePawns;
 		InitPlayers();
 	}
@@ -39,11 +30,29 @@ public class GameController : MonoBehaviour
 		for (int i = 0; i < countPlayers; i++)
 		{
 			var playerPos = (PlayerPosition)i;
-			var player = Instantiate(instancePlayers[i], gameMap.GetOriginPosition(playerPos), Quaternion.identity);
+			var player = Instantiate(instancePlayers[i], GameData.instance.map.GetOriginPosition(playerPos), Quaternion.identity);
 			var sPlayer = player.GetComponent<Player>();
 			sPlayer.playerPosition = playerPos;
-			players.Add(playerPos, sPlayer);
+			sPlayer.EndTurn += EndTurn;
+			m_Players.Add(playerPos, sPlayer);
 		}
+	}
+
+	public void CanMovePawns(int steps)
+	{
+		bool canMove = m_Players[(PlayerPosition)currentPlayer].CanMovePawns(steps);
+		if (!canMove)
+			NextTurn();
+	}
+
+	public void EndTurn()
+	{
+		foreach (var key in m_Players.Keys)
+		{
+			if (!m_Players[key].IsPawnsEndMove())
+				return;
+		}
+		NextTurn();
 	}
 
 	/// <summary>
@@ -51,35 +60,26 @@ public class GameController : MonoBehaviour
 	/// </summary>
 	public int NextTurn()
 	{
-		currentPlayer = (++currentPlayer)%countPlayers;
-		gameState = GameStates.RollDice;
+		currentPlayer = (++currentPlayer) % countPlayers;
 		dice.SetCanRoll(true);
 		return currentPlayer;
 	}
-
-	public void CanMovePawns(int steps)
-	{
-		bool canMove = players[(PlayerPosition)currentPlayer].CanMovePawns(steps);
-		if (canMove)
-			gameState = GameStates.WalkPawn;
-		else
-			NextTurn();
-	}
-
-	public void EndTurn()
-	{
-		foreach (var key in players.Keys)
-		{
-			if (!players[key].IsPawnsEndMove())
-				return;
-		}
-		if (gameState == GameStates.WalkPawn)
-			NextTurn();
-	}
 }
 
-public enum GameStates
+/// <summary>
+/// Класс для хранения общих данных
+/// </summary>
+public class GameData
 {
-	RollDice,
-	WalkPawn
+	public static GameData instance;
+	public GameMap map { get; } // Игровая карта
+	public float speed { get; } // Скорость игры
+
+	public GameData(GameMap map, float speed = 10f) 
+	{
+		this.map = map;
+		this.speed = speed;
+		if (instance == null)
+			instance = this;
+	}
 }

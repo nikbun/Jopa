@@ -10,14 +10,16 @@ public class Pawn : MonoBehaviour, MapPawn
 	public SpriteRenderer outline;
 	public int number;
 	public Location location { get; set; }
-	public PlayerPosition playerPosition { get { return player.playerPosition; } }
-
-	public Player player;
+	public PlayerPosition playerPosition { get; set; }
 	public bool canMove { get { return outline.enabled; } set { outline.enabled = value; } }
 	public bool inGame { get; set; }
 	public Trace trace { get; set; }
 
 	public bool move = false;
+
+	public delegate void PawnMove();
+	public event PawnMove StartMove;
+	public event PawnMove StopMove;
 
 	void Start()
 	{
@@ -29,7 +31,7 @@ public class Pawn : MonoBehaviour, MapPawn
 	{
 		if (canMove)
 		{
-			player.OffCanMove();
+			StartMove?.Invoke();
 			move = true;
 			StartCoroutine(Move(location != Location.Jopa && trace.to?.location != Location.Jopa));
 		}
@@ -48,7 +50,7 @@ public class Pawn : MonoBehaviour, MapPawn
 			inGame = true;
 		trace.ResetTrace(this, true);
 		move = false;
-		GameController.instance.EndTurn();
+		StopMove?.Invoke();
 	}
 
 	private IEnumerator MoveToPoint(Vector3 target)
@@ -56,7 +58,7 @@ public class Pawn : MonoBehaviour, MapPawn
 		var sqrDistance = (target - transform.position).sqrMagnitude;
 		while (sqrDistance > float.Epsilon)
 		{
-			transform.position = Vector3.MoveTowards(transform.position, target, GameController.instance.gameSpeed * Time.deltaTime);
+			transform.position = Vector3.MoveTowards(transform.position, target, GameData.instance.speed * Time.deltaTime);
 			sqrDistance = (target - transform.position).sqrMagnitude;
 			yield return null;
 		}
@@ -64,21 +66,21 @@ public class Pawn : MonoBehaviour, MapPawn
 
 	public void Shift()
 	{
+		StartMove?.Invoke();
+		move = true;
 		if (location == Location.Tolchok)
 		{
 			trace.ResetTrace(saveFrom:true);
-			trace = player.gameMap.GetTolchokTraceToNext(this);
-			move = true;
+			trace = GameData.instance.map.GetTolchokTraceToNext(this);
 			StartCoroutine(Move(true));
 		}
 		else
 		{
-			var pos = player.gameMap.GetJopaPosition(playerPosition);
+			var pos = GameData.instance.map.GetJopaPosition(playerPosition);
 			trace.ResetTrace(this);
 			trace.way.Add(pos);
 			location = Location.Jopa;
 			inGame = false;
-			move = true;
 			StartCoroutine(Move(false));
 		}
 	}
