@@ -17,7 +17,7 @@ namespace Map.MapObjects
 
 		public bool CanMove(MapPawn pawn, int steps)
 		{
-			var trace = new Trace(from: pawn.trace?.from);
+			var trace = pawn.trace;
 			var index = cells.FindIndex(c => c.pawn == pawn);
 			bool canMove = false;
 			switch (index)

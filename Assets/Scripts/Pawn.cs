@@ -16,19 +16,20 @@ public class Pawn : MonoBehaviour, MapPawn
 
 	public Location location { get; set; }
 	public PlayerPosition playerPosition { get; set; }
-	public bool canStartMoving { get { return outline.enabled; } set { outline.enabled = value; } }
+	public bool readyStartMoving { get { return outline.enabled; } set { outline.enabled = value; } }
 	public bool inGame { get; set; }
 	public Trace trace { get; set; }
 
 	void Start()
 	{
 		location = Location.Origin;
-		canStartMoving = false;
+		readyStartMoving = false;
+		trace = GameData.instance.map.GetStartTrace(playerPosition);
 	}
 
 	void OnMouseDown()
 	{
-		if (canStartMoving)
+		if (readyStartMoving)
 		{
 			StartMove?.Invoke();
 			m_Moving = true;
@@ -38,6 +39,8 @@ public class Pawn : MonoBehaviour, MapPawn
 
 	public bool CanStartMove(int distance) 
 	{
+		trace.way.Clear();
+		trace.to = null;
 		return GameData.instance.map.CanMove(this, distance);
 	}
 
@@ -101,7 +104,7 @@ public class Pawn : MonoBehaviour, MapPawn
 
 	public void SetTrace(bool canMove, Trace trace = null)
 	{
-		this.canStartMoving = canMove;
+		this.readyStartMoving = canMove;
 		this.trace = trace!=null?trace:this.trace;
 	}
 

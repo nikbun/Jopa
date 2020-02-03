@@ -70,6 +70,11 @@ namespace Map
 					return false;
 			}
 		}
+
+		public Trace GetStartTrace(PlayerPosition playerPosition) 
+		{
+			return new Trace(origin.GetCell(playerPosition));
+		}
 	}
 
 	public enum Location

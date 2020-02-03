@@ -9,7 +9,7 @@ namespace Map.MapObjects
 		public Home home;
 
 		private List<ICell> cells = new List<ICell>();
-		private Dictionary<PlayerPosition, int> shift = new Dictionary<PlayerPosition, int>();
+		private Dictionary<PlayerPosition, int> shift = new Dictionary<PlayerPosition, int>(); // Смещение относительно позиции игрока
 
 		public Circle()
 		{
@@ -36,8 +36,7 @@ namespace Map.MapObjects
 
 		public bool CanMove(MapPawn pawn, int steps, Trace trace = null, bool back = false)
 		{
-			if (trace == null)
-				trace = new Trace(from: pawn.trace?.from);
+			trace = pawn.trace;
 			int end = GetIndex(0, pawn.playerPosition);
 			int index = back?end+1:cells.FindIndex(c => c.pawn == pawn);
 			bool canMove = true;

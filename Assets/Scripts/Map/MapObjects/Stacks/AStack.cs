@@ -20,7 +20,7 @@ namespace Map.MapObjects
 		/// <returns></returns>
 		public bool CanMove(MapPawn pawn, int steps)
 		{
-			var trace = new Trace(from:pawn.trace?.from);
+			var trace = pawn.trace;
 			if (steps != 6)
 				return false;
 			bool canMove;

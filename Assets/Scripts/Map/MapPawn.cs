@@ -13,7 +13,7 @@
 		/// <summary>
 		/// Показывает игроку, что пешка может двигаться
 		/// </summary>
-		bool canStartMoving { get; set; }
+		bool readyStartMoving { get; set; }
 		/// <summary>
 		/// Путь движения фишки
 		/// </summary>

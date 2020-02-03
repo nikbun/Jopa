@@ -34,8 +34,7 @@ namespace Map.MapObjects
 
 		public bool CanMove(MapPawn pawn, int steps, Trace trace = null)
 		{
-			if (trace == null)
-				trace = new Trace(from: pawn.trace?.from);
+			trace = pawn.trace;
 			int end = GetEnd(pawn.playerPosition);
 			int index = cells[pawn.playerPosition].FindIndex(c => c.pawn == pawn);
 			bool canMove = true;

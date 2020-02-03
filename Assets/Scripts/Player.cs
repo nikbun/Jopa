@@ -66,7 +66,7 @@ public class Player : MonoBehaviour
 	{
 		foreach (var pawn in m_Pawns)
 		{
-			pawn.canStartMoving = false;
+			pawn.readyStartMoving = false;
 		}
 	}
 }
