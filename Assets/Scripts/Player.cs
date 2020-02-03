@@ -8,8 +8,8 @@ using UnityEngine;
 
 public class Player : MonoBehaviour 
 {
-	public PlayerPosition playerPosition;
 	public GameObject instancePawns;
+	public PlayerPosition playerPosition;
 
 	public delegate void EndTurnDeleg();
 	public event EndTurnDeleg EndTurn;
@@ -45,7 +45,7 @@ public class Player : MonoBehaviour
 		bool canMove = false;
 		foreach (var pawn in m_Pawns)
 		{
-			canMove = GameData.instance.map.CanMove(pawn, diceResult) || canMove; 
+			canMove = pawn.CanStartMove(diceResult) || canMove; 
 		}
 		return canMove;
 	}

@@ -36,13 +36,18 @@ public class Pawn : MonoBehaviour, MapPawn
 		}
 	}
 
+	public bool CanStartMove(int distance) 
+	{
+		return GameData.instance.map.CanMove(this, distance);
+	}
+
 	IEnumerator Move(bool withHit = true)
 	{
 		for(int i = 0; i < trace.way.Count; i++)
 		{
 			if (withHit)
-				HitOtherPawn(trace.way[i]);
-			yield return StartCoroutine( MoveToPoint(trace.way[i]));
+				HitOtherPawn(trace.way[i].point);
+			yield return StartCoroutine( MoveToPoint(trace.way[i].point));
 		}
 
 		if (!inGame && location == Location.Circle)
@@ -77,7 +82,7 @@ public class Pawn : MonoBehaviour, MapPawn
 		{
 			var pos = GameData.instance.map.GetJopaPosition(playerPosition);
 			trace.ResetTrace(this);
-			trace.way.Add(pos);
+			trace.way.Add(new Trace.Point(pos, Location.Jopa));
 			location = Location.Jopa;
 			inGame = false;
 			StartCoroutine(Move(false));

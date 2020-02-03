@@ -9,17 +9,13 @@ namespace Map
 	/// </summary>
 	public class Trace
 	{
-		public List<Vector3> way;
+		public List<Point> way = new List<Point>();
 		public ICell from;
 		public ICell to;
 
-		public Trace(List<Vector3> way = null, ICell from = null, ICell to = null)
+		public Trace(ICell from = null)
 		{
-			if (way == null)
-				way = new List<Vector3>();
-			this.way = way;
 			this.from = from;
-			this.to = to;
 		}
 
 		/// <summary>
@@ -30,7 +26,12 @@ namespace Map
 		public void UpdateTrace(ICell toCell, bool lastCell = false)
 		{
 			to = toCell;
-			way.AddRange(toCell.GetWay(lastCell));
+			var points = toCell.GetWay(lastCell);
+			for (var i = 0; i < points.Count; i++) 
+			{
+				bool last = i + 1 == points.Count;
+				way.Add(new Point(points[i], toCell.location, last ? toCell : null));
+			}
 		}
 
 		/// <summary>
@@ -59,10 +60,22 @@ namespace Map
 						pawn.location = from.location;
 				}
 			}
-			if (way != null)
-				way.Clear();
-			else
-				way = new List<Vector3>();
+			way.Clear();
+		}
+
+
+		public struct Point
+		{
+			public Vector3 point;
+			public Location location;
+			public ICell cell;
+
+			public Point(Vector3 point, Location location, ICell cell = null) 
+			{
+				this.point = point;
+				this.location = location;
+				this.cell = cell;
+			}
 		}
 	}
 }
