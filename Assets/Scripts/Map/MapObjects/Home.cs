@@ -32,11 +32,11 @@ namespace Map.MapObjects
 			cells.Add(PlayerPosition.Right, lCells);
 		}
 
-		public bool CanMove(MapPawn pawn, int steps, Trace trace = null)
+		public bool CanMove(Tracker tracker, int steps, Trace trace = null)
 		{
-			trace = pawn.trace;
-			int end = GetEnd(pawn.playerPosition);
-			int index = cells[pawn.playerPosition].FindIndex(c => c.pawn == pawn);
+			trace = tracker.trace;
+			int end = GetEnd(tracker.playerPosition);
+			int index = cells[tracker.playerPosition].FindIndex(c => c.tracker == tracker);
 			bool canMove = true;
 			bool back = false;
 			if (index > end)
@@ -46,19 +46,19 @@ namespace Map.MapObjects
 				if (index == end)
 					back = true;
 				if (back && index == 0)
-					return circle.CanMove(pawn, steps, trace, true);
+					return circle.CanMove(tracker, steps, trace, true);
 				if (back)
-					index = --index + cells[pawn.playerPosition].Count;
+					index = --index + cells[tracker.playerPosition].Count;
 				else
 					index++;
-				index %= cells[pawn.playerPosition].Count;
-				var cell = cells[pawn.playerPosition][index];
-				canMove = cell.CanOccupy(pawn, steps == 1);
+				index %= cells[tracker.playerPosition].Count;
+				var cell = cells[tracker.playerPosition][index];
+				canMove = cell.CanOccupy(tracker, steps == 1);
 				trace.UpdateTrace(cell);
 				steps--;
 			}
 
-			pawn.SetTrace(canMove, canMove ? trace : null);
+			tracker.SetTrace(canMove, canMove ? trace : null);
 			return canMove;
 		}
 
@@ -66,7 +66,7 @@ namespace Map.MapObjects
 		{
 			for(int i = 3; i >= 0; i--)
 			{
-				if (cells[playerPosition][i].pawn == null)
+				if (cells[playerPosition][i].tracker == null)
 					return i;
 			}
 			return -1;

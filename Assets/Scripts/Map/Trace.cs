@@ -37,15 +37,15 @@ namespace Map
 		/// <summary>
 		/// Сбрасывает трасировку с начальным значениям
 		/// </summary>
-		/// <param name="pawn">Пешка, если установлена колечная клетка, устанавливает в нее пешку и делает его начальной</param>
+		/// <param name="tracker">Пешка, если установлена колечная клетка, устанавливает в нее пешку и делает его начальной</param>
 		/// <param name="updateLocation">Обновляет локацию пешки, беря ее из конечной клетки</param>
 		/// <param name="saveFrom">Сохранить начальную клетку</param>
-		public void ResetTrace(MapPawn pawn = null, bool updateLocation = false, bool saveFrom = false)
+		public void ResetTrace(Tracker tracker = null, bool updateLocation = false, bool saveFrom = false)
 		{
 			if (from != null)
 			{
-				if (pawn == from.pawn || from.pawn == null)// TODO Костыль для срезов
-					from.pawn = null;
+				if (tracker == from.tracker || from.tracker == null)// TODO Костыль для срезов
+					from.tracker = null;
 			}
 			if (!saveFrom)
 				from = null;
@@ -53,11 +53,11 @@ namespace Map
 			{
 				from = to;
 				to = null;
-				if (pawn != null)
+				if (tracker != null)
 				{
-					from.pawn = pawn;
+					from.tracker = tracker;
 					if (updateLocation)
-						pawn.location = from.location;
+						tracker.location = from.location;
 				}
 			}
 			way.Clear();

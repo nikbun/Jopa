@@ -15,10 +15,10 @@ namespace Map.MapObjects
 			this.exit = exit;
 		}
 
-		public bool CanMove(MapPawn pawn, int steps)
+		public bool CanMove(Tracker tracker, int steps)
 		{
-			var trace = pawn.trace;
-			var index = cells.FindIndex(c => c.pawn == pawn);
+			var trace = tracker.trace;
+			var index = cells.FindIndex(c => c.tracker == tracker);
 			bool canMove = false;
 			switch (index)
 			{
@@ -39,7 +39,7 @@ namespace Map.MapObjects
 					break;
 			}
 			 
-			pawn.SetTrace(canMove, canMove ? trace : null);
+			tracker.SetTrace(canMove, canMove ? trace : null);
 			return canMove;
 		}
 
@@ -53,20 +53,20 @@ namespace Map.MapObjects
 			bool canMove = false;
 			for (int i = positionTo; i < 3; i++)
 			{
-				canMove = cells[i].pawn == null;
+				canMove = cells[i].tracker == null;
 				if (canMove)
 					break;
 			}
 			if (!canMove)
-				canMove = cells[2]?.pawn?.playerPosition != exit.pawn?.playerPosition 
-					|| exit.pawn?.playerPosition == null;
+				canMove = cells[2]?.tracker?.playerPosition != exit.tracker?.playerPosition 
+					|| exit.tracker?.playerPosition == null;
 
 			return canMove;
 		}
 
-		public ICell GetNextCell(MapPawn pawn)
+		public ICell GetNextCell(Tracker tracker)
 		{
-			var index = cells.FindIndex(c => c.pawn == pawn);
+			var index = cells.FindIndex(c => c.tracker == tracker);
 			if (index < 0)
 			{
 				return null;

@@ -15,17 +15,17 @@ namespace Map.MapObjects
 		/// Проверка на возможность двигаться
 		/// Устанавливает трасировку на пешку в случае возможности движения
 		/// </summary>
-		/// <param name="pawn">Передвигаемая пешка</param>
+		/// <param name="tracker">Передвигаемая пешка</param>
 		/// <param name="steps">Количество шагов</param>
 		/// <returns></returns>
-		public bool CanMove(MapPawn pawn, int steps)
+		public bool CanMove(Tracker tracker, int steps)
 		{
-			var trace = pawn.trace;
+			var trace = tracker.trace;
 			if (steps != 6)
 				return false;
 			bool canMove;
-			trace.UpdateTrace(GetTarget(pawn, out canMove));
-			pawn.SetTrace(canMove, canMove ? trace : null);
+			trace.UpdateTrace(GetTarget(tracker, out canMove));
+			tracker.SetTrace(canMove, canMove ? trace : null);
 			return canMove;
 		}
 		/// <summary>
@@ -54,6 +54,6 @@ namespace Map.MapObjects
 		/// <param name="pawn"></param>
 		/// <param name="canOccupy"></param>
 		/// <returns></returns>
-		public abstract ICell GetTarget(MapPawn pawn, out bool canOccupy);
+		public abstract ICell GetTarget(Tracker pawn, out bool canOccupy);
 	}
 }

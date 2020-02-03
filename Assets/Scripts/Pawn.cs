@@ -4,27 +4,31 @@ using System.Collections.Generic;
 using System.Collections;
 using Map.MapObjects;
 
-public class Pawn : MonoBehaviour, MapPawn
+public class Pawn : MonoBehaviour
 {
 	public SpriteRenderer outline; // Подсветка, в случае, если фишкой можно ходить
+	public PlayerPosition playerPosition;
 
 	public delegate void PawnMove();
 	public event PawnMove StartMove;
 	public event PawnMove StopMove;
 
 	bool m_Moving = false;
+	Tracker m_Tracker;
 
-	public Location location { get; set; }
-	public PlayerPosition playerPosition { get; set; }
-	public bool readyStartMoving { get { return outline.enabled; } set { outline.enabled = value; } }
-	public bool inGame { get; set; }
-	public Trace trace { get; set; }
+	public bool readyStartMoving { 
+		get { return outline.enabled; } 
+		set 
+		{
+			outline.enabled = value;
+		} 
+	}
 
 	void Start()
 	{
-		location = Location.Origin;
 		readyStartMoving = false;
-		trace = GameData.instance.map.GetStartTrace(playerPosition);
+		m_Tracker = new Tracker(playerPosition);
+		m_Tracker.ShiftMove += Shift;
 	}
 
 	void OnMouseDown()
@@ -33,29 +37,30 @@ public class Pawn : MonoBehaviour, MapPawn
 		{
 			StartMove?.Invoke();
 			m_Moving = true;
-			StartCoroutine(Move(location != Location.Jopa && trace.to?.location != Location.Jopa));
+			StartCoroutine(Move(m_Tracker.location != Location.Jopa && m_Tracker.trace.to?.location != Location.Jopa));
 		}
 	}
 
 	public bool CanStartMove(int distance) 
 	{
-		trace.way.Clear();
-		trace.to = null;
-		return GameData.instance.map.CanMove(this, distance);
+		m_Tracker.trace.way.Clear();
+		m_Tracker.trace.to = null;
+		readyStartMoving = GameData.instance.map.CanMove(m_Tracker, distance);
+		return readyStartMoving;
 	}
 
 	IEnumerator Move(bool withHit = true)
 	{
-		for(int i = 0; i < trace.way.Count; i++)
+		for(int i = 0; i < m_Tracker.trace.way.Count; i++)
 		{
 			if (withHit)
-				HitOtherPawn(trace.way[i].point);
-			yield return StartCoroutine( MoveToPoint(trace.way[i].point));
+				HitOtherPawn(m_Tracker.trace.way[i].point);
+			yield return StartCoroutine( MoveToPoint(m_Tracker.trace.way[i].point));
 		}
 
-		if (!inGame && location == Location.Circle)
-			inGame = true;
-		trace.ResetTrace(this, true);
+		if (!m_Tracker.inGame && m_Tracker.location == Location.Circle)
+			m_Tracker.inGame = true;
+		m_Tracker.trace.ResetTrace(m_Tracker, true);
 		m_Moving = false;
 		StopMove?.Invoke();
 	}
@@ -71,25 +76,11 @@ public class Pawn : MonoBehaviour, MapPawn
 		}
 	}
 
-	public void Shift()
+	public void Shift(bool withHit)
 	{
 		StartMove?.Invoke();
 		m_Moving = true;
-		if (location == Location.Tolchok)
-		{
-			trace.ResetTrace(saveFrom:true);
-			trace = GameData.instance.map.GetTolchokTraceToNext(this);
-			StartCoroutine(Move(true));
-		}
-		else
-		{
-			var pos = GameData.instance.map.GetJopaPosition(playerPosition);
-			trace.ResetTrace(this);
-			trace.way.Add(new Trace.Point(pos, Location.Jopa));
-			location = Location.Jopa;
-			inGame = false;
-			StartCoroutine(Move(false));
-		}
+		StartCoroutine(Move(withHit));
 	}
 
 	private void HitOtherPawn(Vector3 target)
@@ -98,15 +89,10 @@ public class Pawn : MonoBehaviour, MapPawn
 		var hits = Physics.RaycastAll(transform.position, direction.normalized, direction.magnitude, 1 << gameObject.layer);
 		if (hits.Length > 0)
 		{
-			hits[0].transform.GetComponent<MapPawn>().Shift();
+			hits[0].transform.GetComponent<Pawn>().m_Tracker.Shift();
 		}
 	}
 
-	public void SetTrace(bool canMove, Trace trace = null)
-	{
-		this.readyStartMoving = canMove;
-		this.trace = trace!=null?trace:this.trace;
-	}
 
 	public bool IsMoving() 
 	{

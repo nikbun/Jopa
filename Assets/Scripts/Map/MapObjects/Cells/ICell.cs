@@ -8,7 +8,7 @@ namespace Map.MapObjects
 		/// <summary>
 		/// Пешка игрока
 		/// </summary>
-		MapPawn pawn { get; set; }
+		Tracker tracker { get; set; }
 		/// <summary>
 		/// Расположение на карте (Старт, дом, круг, толчек)
 		/// </summary>
@@ -20,10 +20,10 @@ namespace Map.MapObjects
 		/// <summary>
 		/// Может ли пешка занять клетку
 		/// </summary>
-		/// <param name="pawn">Пешка пытающаяся занять клетку</param>
+		/// <param name="tracker">Пешка пытающаяся занять клетку</param>
 		/// <param name="lastCell">Полседняя ли это клетка на пути пешки</param>
 		/// <returns></returns>
-		bool CanOccupy(MapPawn pawn, bool lastCell = false);
+		bool CanOccupy(Tracker tracker, bool lastCell = false);
 		/// <summary>
 		/// Получение точек пути
 		/// </summary>

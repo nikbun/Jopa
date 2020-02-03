@@ -8,12 +8,12 @@ namespace Map.MapObjects
 	/// </summary>
 	public class CellTolchek:ICell
 	{
-		public MapPawn pawn
+		public Tracker tracker
 		{
 			get { return null; }
 			set {
 				value.trace.from = tolchekCell;
-				tolchekCell.pawn = value;
+				tolchekCell.tracker = value;
 			}
 		}
 		public Location location { get { return tolchekCell.location; } set { } }
@@ -28,7 +28,7 @@ namespace Map.MapObjects
 			this.tolchek = tolchek;
 		}
 
-		public bool CanOccupy(MapPawn pawn, bool lastCell = false)
+		public bool CanOccupy(Tracker tracker, bool lastCell = false)
 		{
 			return !lastCell || lastCell && tolchek.CanMove(0);
 		}

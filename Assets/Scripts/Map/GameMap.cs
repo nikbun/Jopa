@@ -39,33 +39,33 @@ namespace Map
 		/// <summary>
 		/// Получает трасировку к следующей клетке в толчке
 		/// </summary>
-		/// <param name="pawn">Пешка находящаяся в толчке</param>
+		/// <param name="tracker">Пешка находящаяся в толчке</param>
 		/// <returns></returns>
-		public Trace GetTolchokTraceToNext(MapPawn pawn)
+		public Trace GetTolchokTraceToNext(Tracker tracker)
 		{
-			return tolchek.GetTrace(pawn);
+			return tolchek.GetTrace(tracker);
 		}
 
 		/// <summary>
 		/// Определяет может ли пешка ходить на заданное количество шагов
 		/// </summary>
-		/// <param name="pawn"></param>
+		/// <param name="tracker"></param>
 		/// <param name="steps"></param>
 		/// <returns></returns>
-		public bool CanMove(MapPawn pawn, int steps)
+		public bool CanMove(Tracker tracker, int steps)
 		{
-			switch (pawn.location)
+			switch (tracker.location)
 			{
 				case Location.Origin:
-					return origin.CanMove(pawn, steps);
+					return origin.CanMove(tracker, steps);
 				case Location.Circle:
-					return circle.CanMove(pawn, steps);
+					return circle.CanMove(tracker, steps);
 				case Location.Home:
-					return home.CanMove(pawn, steps);
+					return home.CanMove(tracker, steps);
 				case Location.Jopa:
-					return jopa.CanMove(pawn, steps);
+					return jopa.CanMove(tracker, steps);
 				case Location.Tolchok:
-					return tolchek.CanMove(pawn, steps);
+					return tolchek.CanMove(tracker, steps);
 				default:
 					return false;
 			}

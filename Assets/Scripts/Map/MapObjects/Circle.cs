@@ -34,29 +34,29 @@ namespace Map.MapObjects
 			shift.Add(PlayerPosition.Right, 42);
 		}
 
-		public bool CanMove(MapPawn pawn, int steps, Trace trace = null, bool back = false)
+		public bool CanMove(Tracker tracker, int steps, Trace trace = null, bool back = false)
 		{
-			trace = pawn.trace;
-			int end = GetIndex(0, pawn.playerPosition);
-			int index = back?end+1:cells.FindIndex(c => c.pawn == pawn);
+			trace = tracker.trace;
+			int end = GetIndex(0, tracker.playerPosition);
+			int index = back?end+1:cells.FindIndex(c => c.tracker == tracker);
 			bool canMove = true;
 
 			while (canMove && steps > 0)
 			{
-				if (pawn.inGame && index == end && !back)
-					return home.CanMove(pawn, steps, trace);
+				if (tracker.inGame && index == end && !back)
+					return home.CanMove(tracker, steps, trace);
 				if (back)
 					index = --index + cells.Count;
 				else
 					index++;
 				index %= cells.Count;
 				var cell = cells[index];
-				canMove = cell.CanOccupy(pawn, steps == 1);
+				canMove = cell.CanOccupy(tracker, steps == 1);
 				trace.UpdateTrace(cell, steps == 1);
 				steps--;
 			}
 
-			pawn.SetTrace(canMove, canMove?trace:null);
+			tracker.SetTrace(canMove, canMove?trace:null);
 			return canMove;
 		}
 

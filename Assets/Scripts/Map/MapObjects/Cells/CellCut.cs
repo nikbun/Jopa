@@ -9,7 +9,7 @@ namespace Map.MapObjects
 	/// </summary>
 	public class CellCut : ICell
 	{
-		public MapPawn pawn { get { return startCell.pawn; } set { endCell.SetPawn(value); } }
+		public Tracker tracker { get { return startCell.tracker; } set { endCell.SetPawn(value); } }
 		public Location location { get { return startCell.location; } set { startCell.location = value; } }
 		public Vector3 position { get { return startCell.position; } set { startCell.position = value; } }
 
@@ -35,20 +35,20 @@ namespace Map.MapObjects
 			this.endCell = endCell;
 		}
 
-		public bool CanOccupy(MapPawn pawn, bool lastCell = false)
+		public bool CanOccupy(Tracker tracker, bool lastCell = false)
 		{
-			return (lastCell || startCell.CanOccupy(pawn)) && (!lastCell || endCell.CanOccupyEnd(pawn));
+			return (lastCell || startCell.CanOccupy(tracker)) && (!lastCell || endCell.CanOccupyEnd(tracker));
 		}
 
 		/// <summary>
 		/// Проверка на незанятость конечной ячейки
 		/// Необходима, для избежания зациклености
 		/// </summary>
-		/// <param name="pawn"></param>
+		/// <param name="tracker"></param>
 		/// <returns></returns>
-		public bool CanOccupyEnd(MapPawn pawn)
+		public bool CanOccupyEnd(Tracker tracker)
 		{
-			return startCell.CanOccupy(pawn, true);
+			return startCell.CanOccupy(tracker, true);
 		}
 
 		public List<Vector3> GetWay(bool lastCell = false)
@@ -67,10 +67,10 @@ namespace Map.MapObjects
 		/// Так же решает проблемы зацикленности
 		/// Устанавливает пешку в начало у конечной клетки
 		/// </summary>
-		/// <param name="pawn"></param>
-		public void SetPawn(MapPawn pawn)
+		/// <param name="tracker"></param>
+		public void SetPawn(Tracker tracker)
 		{
-			startCell.pawn = pawn;
+			startCell.tracker = tracker;
 		}
 	}
 }

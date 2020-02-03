@@ -18,10 +18,10 @@ namespace Map.MapObjects
 			cells.Add(PlayerPosition.Right, new Cell(7.2f, 0, loc));
 		}
 
-		public override ICell GetTarget(MapPawn pawn, out bool canOccupy)
+		public override ICell GetTarget(Tracker tracker, out bool canOccupy)
 		{
-			var cell = circle.GetCell(0, pawn.playerPosition);
-			canOccupy = cell.CanOccupy(pawn, true);
+			var cell = circle.GetCell(0, tracker.playerPosition);
+			canOccupy = cell.CanOccupy(tracker, true);
 			return cell;
 		}
 	}

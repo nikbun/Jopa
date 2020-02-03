@@ -45,29 +45,29 @@ namespace Map.MapObjects
 			tolcheks.Add(tolchek);
 		}
 
-		public bool CanMove(MapPawn pawn, int steps)
+		public bool CanMove(Tracker tracker, int steps)
 		{
 			bool canMove = false;
 			foreach (var tolchek in tolcheks)
 			{
-				canMove = canMove || tolchek.CanMove(pawn, steps);
+				canMove = canMove || tolchek.CanMove(tracker, steps);
 			}
 			return canMove;
 		}
 
-		public Trace GetTrace(MapPawn pawn)
+		public Trace GetTrace(Tracker tracker)
 		{
 			foreach (var tolchek in tolcheks)
 			{
-				ICell cell = tolchek.GetNextCell(pawn);
+				ICell cell = tolchek.GetNextCell(tracker);
 				if (cell != null)
 				{
-					pawn.trace.UpdateTrace(cell);
+					tracker.trace.UpdateTrace(cell);
 					break;
 				}
 					
 			}
-			return pawn.trace;
+			return tracker.trace;
 		}
 	}
 }
