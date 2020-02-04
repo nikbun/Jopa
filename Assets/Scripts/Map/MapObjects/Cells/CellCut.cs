@@ -9,7 +9,7 @@ namespace Map.MapObjects
 	/// </summary>
 	public class CellCut : ICell
 	{
-		public Tracker tracker { get { return startCell.tracker; } set { endCell.SetPawn(value); } }
+		public Tracker tracker { get { return startCell.tracker; } set { startCell.tracker = value; } }
 		public Location location { get { return startCell.location; } set { startCell.location = value; } }
 		public Vector3 position { get { return startCell.position; } set { startCell.position = value; } }
 
@@ -51,13 +51,16 @@ namespace Map.MapObjects
 			return startCell.CanOccupy(tracker, true);
 		}
 
-		public List<Vector3> GetWay(bool lastCell = false)
+		public List<Trace.Point> GetWay(bool lastCell = false)
 		{
-			List<Vector3> way = new List<Vector3>() { position };
+			var way = new List<Trace.Point>() { new Trace.Point(position, location, this) };
 			if (lastCell)
 			{
-				way.AddRange(cut);
-				way.Add(endCell.position);
+				foreach (var c in cut) 
+				{
+					way.Add(new Trace.Point(c, location));
+				}
+				way.Add(new Trace.Point(endCell.position, location, endCell));
 			}
 			return way;
 		}

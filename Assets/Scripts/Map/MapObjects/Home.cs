@@ -57,8 +57,6 @@ namespace Map.MapObjects
 				trace.UpdateTrace(cell);
 				steps--;
 			}
-
-			tracker.SetTrace(canMove, canMove ? trace : null);
 			return canMove;
 		}
 

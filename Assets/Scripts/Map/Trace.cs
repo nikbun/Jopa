@@ -26,40 +26,15 @@ namespace Map
 		public void UpdateTrace(ICell toCell, bool lastCell = false)
 		{
 			to = toCell;
-			var points = toCell.GetWay(lastCell);
-			for (var i = 0; i < points.Count; i++) 
-			{
-				bool last = i + 1 == points.Count;
-				way.Add(new Point(points[i], toCell.location, last ? toCell : null));
-			}
+			way.AddRange(toCell.GetWay(lastCell));
 		}
 
 		/// <summary>
 		/// Сбрасывает трасировку с начальным значениям
 		/// </summary>
-		/// <param name="tracker">Пешка, если установлена колечная клетка, устанавливает в нее пешку и делает его начальной</param>
-		/// <param name="updateLocation">Обновляет локацию пешки, беря ее из конечной клетки</param>
-		/// <param name="saveFrom">Сохранить начальную клетку</param>
-		public void ResetTrace(Tracker tracker = null, bool updateLocation = false, bool saveFrom = false)
+		public void ResetTrace()
 		{
-			if (from != null)
-			{
-				if (tracker == from.tracker || from.tracker == null)// TODO Костыль для срезов
-					from.tracker = null;
-			}
-			if (!saveFrom)
-				from = null;
-			if (to != null)
-			{
-				from = to;
-				to = null;
-				if (tracker != null)
-				{
-					from.tracker = tracker;
-					if (updateLocation)
-						tracker.location = from.location;
-				}
-			}
+			to = null;
 			way.Clear();
 		}
 

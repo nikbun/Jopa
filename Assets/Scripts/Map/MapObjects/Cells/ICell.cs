@@ -29,6 +29,6 @@ namespace Map.MapObjects
 		/// </summary>
 		/// <param name="lastCell">Последняя ли это клетка</param>
 		/// <returns>Список проходимых точек</returns>
-		List<Vector3> GetWay(bool lastCell = false);
+		List<Trace.Point> GetWay(bool lastCell = false);
 	}
 }

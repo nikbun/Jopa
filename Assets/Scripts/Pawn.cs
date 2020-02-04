@@ -8,30 +8,30 @@ public class Pawn : MonoBehaviour
 	public PlayerPosition playerPosition;
 
 	public delegate void PawnMove();
-	public event PawnMove StartMove;
-	public event PawnMove StopMove;
+	public event PawnMove StartMovement;
+	public event PawnMove StopMovement;
 
 	Tracker m_Tracker;
 	bool m_Moving;
 
 	public Pawn ()
 	{
-		StartMove = () => m_Moving = true;
-		StopMove = () => m_Moving = false;
+		StartMovement = () => m_Moving = true;
+		StopMovement = () => m_Moving = false;
 	}
 
 	void Start()
 	{
 		outline.enabled = false;
 		m_Tracker = new Tracker(playerPosition, GameData.instance.map);
-		m_Tracker.ShiftMove += Shift;
+		m_Tracker.ShiftMove += StartMove;
 	}
 
 	void OnMouseDown()
 	{
 		if (m_Tracker.readyStartMoving)
 		{
-			StartCoroutine(Move(m_Tracker.canHit));
+			StartMove();
 		}
 	}
 
@@ -51,13 +51,21 @@ public class Pawn : MonoBehaviour
 		outline.enabled = false;
 	}
 
-	IEnumerator Move(bool withHit = true)
+	/// <summary>
+	///  начать движение
+	/// </summary>
+	/// <param name="canHit"></param>
+	public void StartMove()
 	{
-		StartMove?.Invoke();
+		StartCoroutine(Move());
+	}
+
+	IEnumerator Move()
+	{
+		StartMovement?.Invoke();
 		while (m_Tracker.HasNextTarget())
 		{
 			var target = m_Tracker.GetNextTarger();
-			if (withHit) HitOtherPawn(target.point);
 
 			float sqrDistance;
 			do {
@@ -66,31 +74,6 @@ public class Pawn : MonoBehaviour
 				yield return null;
 			} while (sqrDistance > float.Epsilon);
 		}
-
-		m_Tracker.trace.ResetTrace(m_Tracker, true);
-		StopMove?.Invoke();
-	}
-
-	/// <summary>
-	/// Сместить другую пешку
-	/// </summary>
-	/// <param name="target"> Предположительное местонахождение пешки </param>
-	private void HitOtherPawn(Vector3 target)
-	{
-		Vector3 direction = target - transform.position;
-		var hits = Physics.RaycastAll(transform.position, direction.normalized, direction.magnitude, 1 << gameObject.layer);
-		if (hits.Length > 0)
-		{
-			hits[0].transform.GetComponent<Pawn>().m_Tracker.Shift();
-		}
-	}
-
-	/// <summary>
-	///  Другая пешка смещает нашу пешку
-	/// </summary>
-	/// <param name="canHit"></param>
-	public void Shift(bool canHit)
-	{
-		StartCoroutine(Move(canHit));
+		StopMovement?.Invoke();
 	}
 }

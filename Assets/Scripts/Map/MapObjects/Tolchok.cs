@@ -38,8 +38,6 @@ namespace Map.MapObjects
 					canMove = false;
 					break;
 			}
-			 
-			tracker.SetTrace(canMove, canMove ? trace : null);
 			return canMove;
 		}
 

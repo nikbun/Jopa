@@ -14,15 +14,21 @@ namespace Map.MapObjects
 			this.location = location;
 		}
 
+		public Cell(Vector3 position, Location location) 
+		{
+			this.position = position;
+			this.location = location;
+		}
+
 		public bool CanOccupy(Tracker tracker, bool lastCell = false)
 		{
 			return this.tracker == null || this.tracker.Equals(tracker)
 				|| lastCell && this.tracker?.playerPosition != tracker.playerPosition;
 		}
 
-		public List<Vector3> GetWay(bool lastCell = false)
+		public List<Trace.Point> GetWay(bool lastCell = false)
 		{
-			return new List<Vector3>() { position };
+			return new List<Trace.Point>() { new Trace.Point(position, location, this) };
 		}
 	}
 }

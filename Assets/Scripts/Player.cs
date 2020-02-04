@@ -24,8 +24,8 @@ public class Player : MonoBehaviour
 			pawn.transform.SetParent(transform);
 			var sPawn = pawn.GetComponent<Pawn>();
 			sPawn.playerPosition = playerPosition;
-			sPawn.StartMove += OffOutlinePawns;
-			sPawn.StopMove += EndTurn.Invoke;
+			sPawn.StartMovement += OffOutlinePawns;
+			sPawn.StopMovement += EndTurn.Invoke;
 			m_Pawns.Add(sPawn);
 		}
 	}

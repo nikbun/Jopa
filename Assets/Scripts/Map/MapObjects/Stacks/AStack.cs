@@ -25,7 +25,6 @@ namespace Map.MapObjects
 				return false;
 			bool canMove;
 			trace.UpdateTrace(GetTarget(tracker, out canMove));
-			tracker.SetTrace(canMove, canMove ? trace : null);
 			return canMove;
 		}
 		/// <summary>
@@ -35,7 +34,7 @@ namespace Map.MapObjects
 		/// <returns></returns>
 		public Vector3 GetPosition(PlayerPosition playerPosition)
 		{
-			return GetCell(playerPosition).GetWay()[0];
+			return GetCell(playerPosition).GetWay()[0].point;
 		}
 
 		/// <summary>
