@@ -1,8 +1,6 @@
 ﻿using UnityEngine;
 using Map;
-using System.Collections.Generic;
 using System.Collections;
-using Map.MapObjects;
 
 public class Pawn : MonoBehaviour
 {
@@ -13,76 +11,70 @@ public class Pawn : MonoBehaviour
 	public event PawnMove StartMove;
 	public event PawnMove StopMove;
 
-	bool m_Moving = false;
 	Tracker m_Tracker;
+	bool m_Moving;
 
-	public bool readyStartMoving { 
-		get { return outline.enabled; } 
-		set 
-		{
-			outline.enabled = value;
-		} 
+	public Pawn ()
+	{
+		StartMove = () => m_Moving = true;
+		StopMove = () => m_Moving = false;
 	}
 
 	void Start()
 	{
-		readyStartMoving = false;
-		m_Tracker = new Tracker(playerPosition);
+		outline.enabled = false;
+		m_Tracker = new Tracker(playerPosition, GameData.instance.map);
 		m_Tracker.ShiftMove += Shift;
 	}
 
 	void OnMouseDown()
 	{
-		if (readyStartMoving)
+		if (m_Tracker.readyStartMoving)
 		{
-			StartMove?.Invoke();
-			m_Moving = true;
-			StartCoroutine(Move(m_Tracker.location != Location.Jopa && m_Tracker.trace.to?.location != Location.Jopa));
+			StartCoroutine(Move(m_Tracker.canHit));
 		}
+	}
+
+	public bool IsMoving()
+	{
+		return m_Moving;
 	}
 
 	public bool CanStartMove(int distance) 
 	{
-		m_Tracker.trace.way.Clear();
-		m_Tracker.trace.to = null;
-		readyStartMoving = GameData.instance.map.CanMove(m_Tracker, distance);
-		return readyStartMoving;
+		return outline.enabled = m_Tracker.CanStartMove(distance);
+	}
+
+	public void CancelStartMove()
+	{
+		m_Tracker.readyStartMoving = false;
+		outline.enabled = false;
 	}
 
 	IEnumerator Move(bool withHit = true)
 	{
-		for(int i = 0; i < m_Tracker.trace.way.Count; i++)
+		StartMove?.Invoke();
+		while (m_Tracker.HasNextTarget())
 		{
-			if (withHit)
-				HitOtherPawn(m_Tracker.trace.way[i].point);
-			yield return StartCoroutine( MoveToPoint(m_Tracker.trace.way[i].point));
+			var target = m_Tracker.GetNextTarger();
+			if (withHit) HitOtherPawn(target.point);
+
+			float sqrDistance;
+			do {
+				sqrDistance = (target.point - transform.position).sqrMagnitude;
+				transform.position = Vector3.MoveTowards(transform.position, target.point, GameData.instance.speed * Time.deltaTime);
+				yield return null;
+			} while (sqrDistance > float.Epsilon);
 		}
 
-		if (!m_Tracker.inGame && m_Tracker.location == Location.Circle)
-			m_Tracker.inGame = true;
 		m_Tracker.trace.ResetTrace(m_Tracker, true);
-		m_Moving = false;
 		StopMove?.Invoke();
 	}
 
-	private IEnumerator MoveToPoint(Vector3 target)
-	{
-		var sqrDistance = (target - transform.position).sqrMagnitude;
-		while (sqrDistance > float.Epsilon)
-		{
-			transform.position = Vector3.MoveTowards(transform.position, target, GameData.instance.speed * Time.deltaTime);
-			sqrDistance = (target - transform.position).sqrMagnitude;
-			yield return null;
-		}
-	}
-
-	public void Shift(bool withHit)
-	{
-		StartMove?.Invoke();
-		m_Moving = true;
-		StartCoroutine(Move(withHit));
-	}
-
+	/// <summary>
+	/// Сместить другую пешку
+	/// </summary>
+	/// <param name="target"> Предположительное местонахождение пешки </param>
 	private void HitOtherPawn(Vector3 target)
 	{
 		Vector3 direction = target - transform.position;
@@ -93,9 +85,12 @@ public class Pawn : MonoBehaviour
 		}
 	}
 
-
-	public bool IsMoving() 
+	/// <summary>
+	///  Другая пешка смещает нашу пешку
+	/// </summary>
+	/// <param name="canHit"></param>
+	public void Shift(bool canHit)
 	{
-		return m_Moving;
+		StartCoroutine(Move(canHit));
 	}
 }

@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Map;
+﻿using System.Collections.Generic;
 using UnityEngine;
 
 public class Player : MonoBehaviour 
@@ -29,7 +24,7 @@ public class Player : MonoBehaviour
 			pawn.transform.SetParent(transform);
 			var sPawn = pawn.GetComponent<Pawn>();
 			sPawn.playerPosition = playerPosition;
-			sPawn.StartMove += OffCanMove;
+			sPawn.StartMove += OffOutlinePawns;
 			sPawn.StopMove += EndTurn.Invoke;
 			m_Pawns.Add(sPawn);
 		}
@@ -62,11 +57,11 @@ public class Player : MonoBehaviour
 	/// <summary>
 	/// Отключить подсветку фишек, которыми можно ходить
 	/// </summary>
-	void OffCanMove()
+	void OffOutlinePawns()
 	{
 		foreach (var pawn in m_Pawns)
 		{
-			pawn.readyStartMoving = false;
+			pawn.CancelStartMove();
 		}
 	}
 }

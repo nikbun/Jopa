@@ -64,7 +64,7 @@ namespace Map
 		}
 
 
-		public struct Point
+		public class Point
 		{
 			public Vector3 point;
 			public Location location;

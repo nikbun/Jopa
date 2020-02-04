@@ -43,7 +43,7 @@ namespace Map.MapObjects
 
 			while (canMove && steps > 0)
 			{
-				if (tracker.inGame && index == end && !back)
+				if (tracker.inCircle && index == end && !back)
 					return home.CanMove(tracker, steps, trace);
 				if (back)
 					index = --index + cells.Count;
