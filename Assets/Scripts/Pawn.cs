@@ -5,11 +5,11 @@ using System.Collections;
 public class Pawn : MonoBehaviour
 {
 	public SpriteRenderer outline; // Подсветка, в случае, если фишкой можно ходить
-	public PlayerPosition playerPosition;
+	public MapSides mapSide;
 
-	public delegate void PawnMove();
-	public event PawnMove StartMovement;
-	public event PawnMove StopMovement;
+	public delegate void PawnMovement();
+	public event PawnMovement StartMovement;
+	public event PawnMovement StopMovement;
 
 	Tracker m_Tracker;
 	bool m_Moving;
@@ -23,7 +23,7 @@ public class Pawn : MonoBehaviour
 	void Start()
 	{
 		outline.enabled = false;
-		m_Tracker = new Tracker(playerPosition, GameData.instance.map);
+		m_Tracker = new Tracker(mapSide, GameData.instance.map);
 		m_Tracker.ShiftMove += StartMove;
 	}
 
@@ -33,11 +33,6 @@ public class Pawn : MonoBehaviour
 		{
 			StartMove();
 		}
-	}
-
-	public bool IsMoving()
-	{
-		return m_Moving;
 	}
 
 	public bool CanStartMove(int distance) 
@@ -65,15 +60,20 @@ public class Pawn : MonoBehaviour
 		StartMovement?.Invoke();
 		while (m_Tracker.HasNextTarget())
 		{
-			var target = m_Tracker.GetNextTarger();
+			var target = m_Tracker.GetNextTarget();
 
 			float sqrDistance;
 			do {
-				sqrDistance = (target.point - transform.position).sqrMagnitude;
-				transform.position = Vector3.MoveTowards(transform.position, target.point, GameData.instance.speed * Time.deltaTime);
+				sqrDistance = (target.position - transform.position).sqrMagnitude;
+				transform.position = Vector3.MoveTowards(transform.position, target.position, GameData.instance.speed * Time.deltaTime);
 				yield return null;
 			} while (sqrDistance > float.Epsilon);
 		}
 		StopMovement?.Invoke();
+	}
+
+	public bool IsMoving()
+	{
+		return m_Moving;
 	}
 }

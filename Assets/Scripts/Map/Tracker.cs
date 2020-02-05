@@ -1,83 +1,93 @@
-﻿namespace Map
+﻿using Map.MapObjects;
+using System.Collections.Generic;
+
+namespace Map
 {
 	/// <summary>
-	/// Пешка созданная для работы с картой
+	/// Трекер для работы с картой
 	/// </summary>
 	public class Tracker
 	{
-		GameMap m_Map;
-
-		public Trace trace { get; set; }
-		public Location location { get; set; }
-		public PlayerPosition playerPosition { get; }
-		public bool readyStartMoving { get; set; }
-		public bool inCircle { get; set; }
+		public MapSides mapSide { get; }
+		public MapLocations location { get { return m_CurrentCell.location; } }
+		public bool inCircle;
+		public bool readyStartMoving;
 
 		public delegate void ShiftMoveDelg();
 		public event ShiftMoveDelg ShiftMove;
 
-		public Tracker(PlayerPosition playerPosition, GameMap map) 
+		GameMap m_Map;
+		ICell m_CurrentCell;
+		List<ICell> m_Way = new List<ICell>();
+
+		public Tracker(MapSides mapSide, GameMap map) 
 		{
-			this.playerPosition = playerPosition;
+			this.mapSide = mapSide;
 			m_Map = map;
-			trace = map.GetStartTrace(playerPosition);
-			location = Location.Origin;
+			m_CurrentCell = map.GetOrigin(mapSide);
+		}
+
+		/// <summary>
+		/// Обновляет трасировку
+		/// </summary>
+		/// <param name="toCell">Клетка в которую нужно переместиться</param>
+		/// <param name="lastCell">Последняя ли это клетка на пути</param>
+		public void UpdateWay(params ICell[] cells)
+		{
+			m_Way.AddRange(cells);
 		}
 
 		public void Shift()
 		{
-			trace.ResetTrace();
-			if (location == Location.Tolchok)
+			m_Way.Clear();
+			if (location == MapLocations.Tolchok)
 			{
-				trace = m_Map.GetTolchokTraceToNext(this);
+				m_Way.Add(m_Map.GetNextTolchok(this));
 			}
 			else
 			{
-				var pos = m_Map.GetJopaPosition(playerPosition);
-				trace.way.Add(new Trace.Point(pos, Location.Jopa));
-				location = Location.Jopa;
+				m_Way.Add(m_Map.GetJopa(mapSide));
 			}
 			ShiftMove?.Invoke();
 		}
 
 		public bool CanStartMove(int distance) 
 		{
-			trace.ResetTrace();
+			m_Way.Clear();
 			return readyStartMoving = m_Map.CanMove(this, distance);
 		}
 
-		public Trace.Point GetNextTarger() 
+		public bool HasNextTarget()
 		{
-			if (!inCircle && location == Location.Circle)
+			return m_Way.Count > 0;
+		}
+
+		public ICell GetNextTarget() 
+		{
+			if (!inCircle && location == MapLocations.Circle)
 				inCircle = true;
-			else if (inCircle && location == Location.Jopa)
+			else if (inCircle && location == MapLocations.Jopa)
 				inCircle = false;
 
-			Trace.Point point = null;
+			ICell cell = null;
 			if (HasNextTarget()) 
 			{
-				point = trace.way[0];
-				trace.way.RemoveAt(0);
-				location = point.location;
-				if (point.cell != null) 
+				cell = m_Way[0];
+				m_Way.RemoveAt(0);
+				if (cell != null) 
 				{
-					if (trace.from.tracker == this)
-						trace.from.tracker = null;
-					if (point.cell.location != Location.Origin && point.cell.location != Location.Jopa) 
+					if (m_CurrentCell.tracker == this)
+						m_CurrentCell.tracker = null;
+					if (cell.location != MapLocations.Origin && cell.location != MapLocations.Jopa) 
 					{
-						point.cell.tracker?.Shift();
-						point.cell.tracker = this;
+						cell.tracker?.Shift();
+						cell.tracker = this;
 					}
-					trace.from = point.cell;
+					m_CurrentCell = cell;
 					
 				}
 			}
-			return point;
-		}
-
-		public bool HasNextTarget() 
-		{
-			return trace.way.Count > 0;
+			return cell;
 		}
 	}
 }

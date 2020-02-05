@@ -1,10 +1,7 @@
-﻿using UnityEngine;
-using System.Collections;
-using Map.MapObjects;
+﻿using Map.MapObjects;
 
 namespace Map
 {
-
 	public class GameMap
 	{
 		private Circle circle;
@@ -26,24 +23,24 @@ namespace Map
 			tolchek = new TolchokDistributor(circle);
 		}
 
-		public Vector3 GetOriginPosition(PlayerPosition playerPosition)
+		public ICell GetOrigin(MapSides mapSide)
 		{
-			return origin.GetPosition(playerPosition);
+			return origin.GetCell(mapSide);
 		}
 
-		public Vector3 GetJopaPosition(PlayerPosition playerPosition)
+		public ICell GetJopa(MapSides mapSide)
 		{
-			return jopa.GetPosition(playerPosition);
+			return jopa.GetCell(mapSide);
 		}
 
 		/// <summary>
-		/// Получает трасировку к следующей клетке в толчке
+		/// Получает следующую клетку в толчке по трекеру
 		/// </summary>
-		/// <param name="tracker">Пешка находящаяся в толчке</param>
+		/// <param name="tracker"></param>
 		/// <returns></returns>
-		public Trace GetTolchokTraceToNext(Tracker tracker)
+		public ICell GetNextTolchok(Tracker tracker)
 		{
-			return tolchek.GetTrace(tracker);
+			return tolchek.GetTolchek(tracker);
 		}
 
 		/// <summary>
@@ -56,33 +53,42 @@ namespace Map
 		{
 			switch (tracker.location)
 			{
-				case Location.Origin:
+				case MapLocations.Origin:
 					return origin.CanMove(tracker, steps);
-				case Location.Circle:
+				case MapLocations.Circle:
 					return circle.CanMove(tracker, steps);
-				case Location.Home:
+				case MapLocations.Home:
 					return home.CanMove(tracker, steps);
-				case Location.Jopa:
+				case MapLocations.Jopa:
 					return jopa.CanMove(tracker, steps);
-				case Location.Tolchok:
+				case MapLocations.Tolchok:
 					return tolchek.CanMove(tracker, steps);
 				default:
 					return false;
 			}
 		}
-
-		public Trace GetStartTrace(PlayerPosition playerPosition) 
-		{
-			return new Trace(origin.GetCell(playerPosition));
-		}
 	}
 
-	public enum Location
+	/// <summary>
+	/// Расположения на карте
+	/// </summary>
+	public enum MapLocations
 	{
 		Origin,
 		Circle,
 		Home,
 		Jopa,
 		Tolchok
+	}
+
+	/// <summary>
+	/// Стороны карты
+	/// </summary>
+	public enum MapSides
+	{
+		Bottom,
+		Left,
+		Top,
+		Right
 	}
 }

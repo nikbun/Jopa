@@ -11,16 +11,16 @@ namespace Map.MapObjects
 		public Origin(Circle circle)
 		{
 			this.circle = circle;
-			var loc = Location.Origin;
-			cells.Add(PlayerPosition.Bottom, new Cell(0, -7.2f, loc));
-			cells.Add(PlayerPosition.Left, new Cell(-7.2f, 0, loc));
-			cells.Add(PlayerPosition.Top, new Cell(0, 7.2f, loc));
-			cells.Add(PlayerPosition.Right, new Cell(7.2f, 0, loc));
+			var loc = MapLocations.Origin;
+			cells.Add(MapSides.Bottom, new Cell(0, -7.2f, loc));
+			cells.Add(MapSides.Left, new Cell(-7.2f, 0, loc));
+			cells.Add(MapSides.Top, new Cell(0, 7.2f, loc));
+			cells.Add(MapSides.Right, new Cell(7.2f, 0, loc));
 		}
 
 		public override ICell GetTarget(Tracker tracker, out bool canOccupy)
 		{
-			var cell = circle.GetCell(0, tracker.playerPosition);
+			var cell = circle.GetCell(0, tracker.mapSide);
 			canOccupy = cell.CanOccupy(tracker, true);
 			return cell;
 		}

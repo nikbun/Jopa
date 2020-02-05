@@ -13,7 +13,7 @@ public class GameController : MonoBehaviour
 	public Dice dice;
 
 	int m_CurrentPlayer = 0;
-	Dictionary<PlayerPosition, Player> m_Players = new Dictionary<PlayerPosition, Player>(); // Скрипты управления игроками
+	Dictionary<MapSides, Player> m_Players = new Dictionary<MapSides, Player>(); // Скрипты управления игроками
 
 	void Start() 
 	{
@@ -58,18 +58,18 @@ public class GameController : MonoBehaviour
 	{
 		for (int i = 0; i < countPlayers; i++)
 		{
-			var playerPos = (PlayerPosition)i;
-			var player = Instantiate(instancePlayers[i], GameData.instance.map.GetOriginPosition(playerPos), Quaternion.identity);
+			var mapSide = (MapSides)i;
+			var player = Instantiate(instancePlayers[i], GameData.instance.map.GetOrigin(mapSide).position, Quaternion.identity);
 			var sPlayer = player.GetComponent<Player>();
-			sPlayer.playerPosition = playerPos;
+			sPlayer.mapSide = mapSide;
 			sPlayer.EndTurn += EndTurn;
-			m_Players.Add(playerPos, sPlayer);
+			m_Players.Add(mapSide, sPlayer);
 		}
 	}
 
 	void StartTurn(int diceResult)
 	{
-		bool canMove = m_Players[(PlayerPosition)m_CurrentPlayer].CanStartMove(diceResult);
+		bool canMove = m_Players[(MapSides)m_CurrentPlayer].CanStartMove(diceResult);
 		if (!canMove)
 			NextTurn();
 	}

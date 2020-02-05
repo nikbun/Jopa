@@ -9,7 +9,7 @@ namespace Map.MapObjects
 	/// </summary>
 	abstract class AStack
 	{
-		public Dictionary<PlayerPosition, ICell> cells = new Dictionary<PlayerPosition, ICell>();
+		public Dictionary<MapSides, ICell> cells = new Dictionary<MapSides, ICell>();
 
 		/// <summary>
 		/// Проверка на возможность двигаться
@@ -20,31 +20,30 @@ namespace Map.MapObjects
 		/// <returns></returns>
 		public bool CanMove(Tracker tracker, int steps)
 		{
-			var trace = tracker.trace;
 			if (steps != 6)
 				return false;
 			bool canMove;
-			trace.UpdateTrace(GetTarget(tracker, out canMove));
+			tracker.UpdateWay(GetTarget(tracker, out canMove).GetWay().ToArray());
 			return canMove;
 		}
 		/// <summary>
 		/// Получает позицию в зависимости от расположения игрока(игроки снизу, слева, сверху, справа)
 		/// </summary>
-		/// <param name="playerPosition"></param>
+		/// <param name="mapSide"></param>
 		/// <returns></returns>
-		public Vector3 GetPosition(PlayerPosition playerPosition)
+		public Vector3 GetPosition(MapSides mapSide)
 		{
-			return GetCell(playerPosition).GetWay()[0].point;
+			return GetCell(mapSide).GetWay()[0].position;
 		}
 
 		/// <summary>
 		/// Получает клетку в зависимости от расположения игрока
 		/// </summary>
-		/// <param name="playerPosition"></param>
+		/// <param name="mapSide"></param>
 		/// <returns></returns>
-		public ICell GetCell(PlayerPosition playerPosition)
+		public ICell GetCell(MapSides mapSide)
 		{
-			return cells[playerPosition];
+			return cells[mapSide];
 		}
 
 		/// <summary>

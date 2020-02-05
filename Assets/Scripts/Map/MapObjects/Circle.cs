@@ -9,11 +9,11 @@ namespace Map.MapObjects
 		public Home home;
 
 		private List<ICell> cells = new List<ICell>();
-		private Dictionary<PlayerPosition, int> shift = new Dictionary<PlayerPosition, int>(); // Смещение относительно позиции игрока
+		private Dictionary<MapSides, int> shift = new Dictionary<MapSides, int>(); // Смещение относительно позиции игрока
 
 		public Circle()
 		{
-			var loc = Location.Circle;
+			var loc = MapLocations.Circle;
 			for (int x = 6; x > -6; x--)
 				cells.Add(new Cell(x, -6, loc));
 			for (int y = -6; y < 6; y++)
@@ -28,23 +28,22 @@ namespace Map.MapObjects
 			InitCut(32, 40, new List<Vector3>() { new Vector3(2f, 0, 4.5f), new Vector3(4.5f, 0, 2f) });
 			InitCut(44, 4,	new List<Vector3>() { new Vector3(4.5f, 0, -2f), new Vector3(2f, 0, -4.5f) });
 
-			shift.Add(PlayerPosition.Bottom, 6);
-			shift.Add(PlayerPosition.Left, 18);
-			shift.Add(PlayerPosition.Top, 30);
-			shift.Add(PlayerPosition.Right, 42);
+			shift.Add(MapSides.Bottom, 6);
+			shift.Add(MapSides.Left, 18);
+			shift.Add(MapSides.Top, 30);
+			shift.Add(MapSides.Right, 42);
 		}
 
-		public bool CanMove(Tracker tracker, int steps, Trace trace = null, bool back = false)
+		public bool CanMove(Tracker tracker, int steps, bool back = false)
 		{
-			trace = tracker.trace;
-			int end = GetIndex(0, tracker.playerPosition);
+			int end = GetIndex(0, tracker.mapSide);
 			int index = back?end+1:cells.FindIndex(c => c.tracker == tracker);
 			bool canMove = true;
 
 			while (canMove && steps > 0)
 			{
 				if (tracker.inCircle && index == end && !back)
-					return home.CanMove(tracker, steps, trace);
+					return home.CanMove(tracker, steps);
 				if (back)
 					index = --index + cells.Count;
 				else
@@ -52,26 +51,26 @@ namespace Map.MapObjects
 				index %= cells.Count;
 				var cell = cells[index];
 				canMove = cell.CanOccupy(tracker, steps == 1);
-				trace.UpdateTrace(cell, steps == 1);
+				tracker.UpdateWay(cell.GetWay(steps == 1).ToArray());
 				steps--;
 			}
 			return canMove;
 		}
 
-		public ICell GetCell(int cellNumber, PlayerPosition playerPosition = PlayerPosition.Bottom)
+		public ICell GetCell(int cellNumber, MapSides mapSide = MapSides.Bottom)
 		{
-			return cells[GetIndex(cellNumber, playerPosition)];
+			return cells[GetIndex(cellNumber, mapSide)];
 		}
 
 		/// <summary>
 		/// Возвращает индекс ячейки относительно позиции игрока
 		/// </summary>
 		/// <param name="index"> Индекс игрока </param>
-		/// <param name="playerPosition"> Позиция игрока </param>
+		/// <param name="mapSide"> Позиция игрока </param>
 		/// <returns> Настоящий индекс </returns>
-		public int GetIndex(int index, PlayerPosition playerPosition = PlayerPosition.Bottom)
+		public int GetIndex(int index, MapSides mapSide = MapSides.Bottom)
 		{
-			return (index + shift[playerPosition]) % cells.Count;
+			return (index + shift[mapSide]) % cells.Count;
 		}
 
 		public void SetTolchek(Tolchok tolchek, int index)

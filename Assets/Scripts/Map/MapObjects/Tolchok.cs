@@ -17,22 +17,21 @@ namespace Map.MapObjects
 
 		public bool CanMove(Tracker tracker, int steps)
 		{
-			var trace = tracker.trace;
 			var index = cells.FindIndex(c => c.tracker == tracker);
 			bool canMove = false;
 			switch (index)
 			{
 				case 0:
 					canMove = steps == 1 && CanMove(1);
-					trace.UpdateTrace(cells[1], true);
+					tracker.UpdateWay(cells[1].GetWay(true).ToArray());
 					break;
 				case 1:
 					canMove = steps == 3 && CanMove(2);
-					trace.UpdateTrace(cells[2], true);
+					tracker.UpdateWay(cells[2].GetWay(true).ToArray());
 					break;
 				case 2:
 					canMove = steps == 6 && CanMove(3);
-					trace.UpdateTrace(exit, true);
+					tracker.UpdateWay(exit.GetWay(true).ToArray());
 					break;
 				default:
 					canMove = false;
@@ -56,8 +55,8 @@ namespace Map.MapObjects
 					break;
 			}
 			if (!canMove)
-				canMove = cells[2]?.tracker?.playerPosition != exit.tracker?.playerPosition 
-					|| exit.tracker?.playerPosition == null;
+				canMove = cells[2]?.tracker?.mapSide != exit.tracker?.mapSide 
+					|| exit.tracker?.mapSide == null;
 
 			return canMove;
 		}

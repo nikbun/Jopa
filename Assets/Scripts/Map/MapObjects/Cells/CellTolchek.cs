@@ -9,7 +9,7 @@ namespace Map.MapObjects
 	public class CellTolchek:ICell
 	{
 		public Tracker tracker { get; set; }
-		public Location location { get { return tolchekCell.location; } set { } }
+		public MapLocations location { get { return tolchekCell.location; } set { } }
 		public Vector3 position { get; set; }
 
 		private ICell tolchekCell { get { return tolchek?.GetCell(0); } }
@@ -26,12 +26,12 @@ namespace Map.MapObjects
 			return !lastCell || lastCell && tolchek.CanMove(0);
 		}
 
-		public List<Trace.Point> GetWay(bool lastCell = false)
+		public List<ICell> GetWay(bool lastCell = false)
 		{
 			
-			var pos = new List<Trace.Point>() { new Trace.Point(position, location, this) };
+			var pos = new List<ICell>() { this };
 			if (lastCell)
-				pos.Add( new Trace.Point(tolchekCell.position, location, tolchekCell) );
+				pos.Add(tolchekCell);
 			return pos;
 		}
 	}

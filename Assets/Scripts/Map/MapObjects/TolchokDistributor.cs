@@ -13,33 +13,33 @@ namespace Map.MapObjects
 			this.circle = circle;
 
 			List<ICell> cells = new List<ICell>();
-			cells.Add(new Cell(-3, -5, Location.Tolchok));
-			cells.Add(new Cell(-4, -5, Location.Tolchok));
-			cells.Add(new Cell(-5, -5, Location.Tolchok));
+			cells.Add(new Cell(-3, -5, MapLocations.Tolchok));
+			cells.Add(new Cell(-4, -5, MapLocations.Tolchok));
+			cells.Add(new Cell(-5, -5, MapLocations.Tolchok));
 			Tolchok tolchek = new Tolchok(cells, circle.GetCell(6));
 			circle.SetTolchek(tolchek, 3);
 			tolcheks.Add(tolchek);
 
 			cells = new List<ICell>();
-			cells.Add(new Cell(-5, 3, Location.Tolchok));
-			cells.Add(new Cell(-5, 4, Location.Tolchok));
-			cells.Add(new Cell(-5, 5, Location.Tolchok));
+			cells.Add(new Cell(-5, 3, MapLocations.Tolchok));
+			cells.Add(new Cell(-5, 4, MapLocations.Tolchok));
+			cells.Add(new Cell(-5, 5, MapLocations.Tolchok));
 			tolchek = new Tolchok(cells, circle.GetCell(18));
 			circle.SetTolchek(tolchek, 15);
 			tolcheks.Add(tolchek);
 			
 			cells = new List<ICell>();
-			cells.Add(new Cell(3, 5, Location.Tolchok));
-			cells.Add(new Cell(4, 5, Location.Tolchok));
-			cells.Add(new Cell(5, 5, Location.Tolchok));
+			cells.Add(new Cell(3, 5, MapLocations.Tolchok));
+			cells.Add(new Cell(4, 5, MapLocations.Tolchok));
+			cells.Add(new Cell(5, 5, MapLocations.Tolchok));
 			tolchek = new Tolchok(cells, circle.GetCell(30));
 			circle.SetTolchek(tolchek, 27);
 			tolcheks.Add(tolchek);
 
 			cells = new List<ICell>();
-			cells.Add(new Cell(5, -3, Location.Tolchok));
-			cells.Add(new Cell(5, -4, Location.Tolchok));
-			cells.Add(new Cell(5, -5, Location.Tolchok));
+			cells.Add(new Cell(5, -3, MapLocations.Tolchok));
+			cells.Add(new Cell(5, -4, MapLocations.Tolchok));
+			cells.Add(new Cell(5, -5, MapLocations.Tolchok));
 			tolchek = new Tolchok(cells, circle.GetCell(42));
 			circle.SetTolchek(tolchek, 39);
 			tolcheks.Add(tolchek);
@@ -55,19 +55,17 @@ namespace Map.MapObjects
 			return canMove;
 		}
 
-		public Trace GetTrace(Tracker tracker)
+		public ICell GetTolchek(Tracker tracker)
 		{
 			foreach (var tolchek in tolcheks)
 			{
 				ICell cell = tolchek.GetNextCell(tracker);
 				if (cell != null)
 				{
-					tracker.trace.UpdateTrace(cell);
-					break;
+					return cell;
 				}
-					
 			}
-			return tracker.trace;
+			return null;
 		}
 	}
 }

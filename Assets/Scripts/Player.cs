@@ -1,10 +1,11 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
+using Map;
 
 public class Player : MonoBehaviour 
 {
 	public GameObject instancePawns;
-	public PlayerPosition playerPosition;
+	public MapSides mapSide;
 
 	public delegate void EndTurnDeleg();
 	public event EndTurnDeleg EndTurn;
@@ -23,7 +24,7 @@ public class Player : MonoBehaviour
 			var pawn = Instantiate(instancePawns, transform.position, Quaternion.Euler(90f, 0, 0));
 			pawn.transform.SetParent(transform);
 			var sPawn = pawn.GetComponent<Pawn>();
-			sPawn.playerPosition = playerPosition;
+			sPawn.mapSide = mapSide;
 			sPawn.StartMovement += OffOutlinePawns;
 			sPawn.StopMovement += EndTurn.Invoke;
 			m_Pawns.Add(sPawn);
@@ -64,15 +65,4 @@ public class Player : MonoBehaviour
 			pawn.CancelStartMove();
 		}
 	}
-}
-
-/// <summary>
-/// Расположение игроков на карте
-/// </summary>
-public enum PlayerPosition
-{
-	Bottom,
-	Left,
-	Top,
-	Right
 }

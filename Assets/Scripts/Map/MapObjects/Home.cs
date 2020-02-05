@@ -6,37 +6,36 @@ namespace Map.MapObjects
 	public class Home
 	{
 		public Circle circle;
-		private Dictionary<PlayerPosition, List<ICell>> cells = new Dictionary<PlayerPosition, List<ICell>>();
+		private Dictionary<MapSides, List<ICell>> cells = new Dictionary<MapSides, List<ICell>>();
 		
 		public Home(Circle circle)
 		{
 			this.circle = circle;
 			circle.home = this;
 
-			var loc = Location.Home;
+			var loc = MapLocations.Home;
 			var lCells = new List<ICell>();
 			for (int z = -5; z <= -2; z++)
 				lCells.Add(new Cell(0, z, loc));
-			cells.Add(PlayerPosition.Bottom, lCells);
+			cells.Add(MapSides.Bottom, lCells);
 			lCells = new List<ICell>();
 			for (int x = -5; x <= -2; x++)
 				lCells.Add(new Cell(x, 0, loc));
-			cells.Add(PlayerPosition.Left, lCells);
+			cells.Add(MapSides.Left, lCells);
 			lCells = new List<ICell>();
 			for (int z = 5; z >= 2; z--)
 				lCells.Add(new Cell(0, z, loc));
-			cells.Add(PlayerPosition.Top, lCells);
+			cells.Add(MapSides.Top, lCells);
 			lCells = new List<ICell>();
 			for (int x = 5; x >= 2; x--)
 				lCells.Add(new Cell(x, 0, loc));
-			cells.Add(PlayerPosition.Right, lCells);
+			cells.Add(MapSides.Right, lCells);
 		}
 
-		public bool CanMove(Tracker tracker, int steps, Trace trace = null)
+		public bool CanMove(Tracker tracker, int steps)
 		{
-			trace = tracker.trace;
-			int end = GetEnd(tracker.playerPosition);
-			int index = cells[tracker.playerPosition].FindIndex(c => c.tracker == tracker);
+			int end = GetEnd(tracker.mapSide);
+			int index = cells[tracker.mapSide].FindIndex(c => c.tracker == tracker);
 			bool canMove = true;
 			bool back = false;
 			if (index > end)
@@ -46,25 +45,25 @@ namespace Map.MapObjects
 				if (index == end)
 					back = true;
 				if (back && index == 0)
-					return circle.CanMove(tracker, steps, trace, true);
+					return circle.CanMove(tracker, steps, true);
 				if (back)
-					index = --index + cells[tracker.playerPosition].Count;
+					index = --index + cells[tracker.mapSide].Count;
 				else
 					index++;
-				index %= cells[tracker.playerPosition].Count;
-				var cell = cells[tracker.playerPosition][index];
+				index %= cells[tracker.mapSide].Count;
+				var cell = cells[tracker.mapSide][index];
 				canMove = cell.CanOccupy(tracker, steps == 1);
-				trace.UpdateTrace(cell);
+				tracker.UpdateWay(cell.GetWay().ToArray());
 				steps--;
 			}
 			return canMove;
 		}
 
-		private int GetEnd(PlayerPosition playerPosition)
+		private int GetEnd(MapSides mapSide)
 		{
 			for(int i = 3; i >= 0; i--)
 			{
-				if (cells[playerPosition][i].tracker == null)
+				if (cells[mapSide][i].tracker == null)
 					return i;
 			}
 			return -1;

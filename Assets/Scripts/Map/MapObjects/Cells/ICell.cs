@@ -12,7 +12,7 @@ namespace Map.MapObjects
 		/// <summary>
 		/// Расположение на карте (Старт, дом, круг, толчек)
 		/// </summary>
-		Location location { get; set; }
+		MapLocations location { get; set; }
 		/// <summary>
 		/// Координаты пешки
 		/// </summary>
@@ -29,6 +29,6 @@ namespace Map.MapObjects
 		/// </summary>
 		/// <param name="lastCell">Последняя ли это клетка</param>
 		/// <returns>Список проходимых точек</returns>
-		List<Trace.Point> GetWay(bool lastCell = false);
+		List<ICell> GetWay(bool lastCell = false);
 	}
 }
