@@ -11,6 +11,7 @@ namespace Map.MapObjects
 		public Tracker tracker { get; set; }
 		public MapLocations location { get { return tolchekCell.location; } set { } }
 		public Vector3 position { get; set; }
+		public int exitDistance { get; }
 
 		private ICell tolchekCell { get { return tolchek?.GetCell(0); } }
 		private Tolchok tolchek;

@@ -8,10 +8,14 @@ namespace Map.MapObjects
 		public Tracker tracker { get; set; }
 		public MapLocations location { get; set; }
 		public Vector3 position { get; set; }
-		public Cell(float x, float z, MapLocations location)
+
+		public int exitDistance { get; }
+
+		public Cell(float x, float z, MapLocations location, int exitNumber = 0)
 		{
 			position = new Vector3(x, 0, z);
 			this.location = location;
+			this.exitDistance = exitNumber;
 		}
 
 		public Cell(Vector3 position, MapLocations location) 

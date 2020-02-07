@@ -12,10 +12,10 @@ namespace Map.MapObjects
 		{
 			this.circle = circle;
 			var loc = MapLocations.Origin;
-			cells.Add(MapSides.Bottom, new Cell(0, -7.2f, loc));
-			cells.Add(MapSides.Left, new Cell(-7.2f, 0, loc));
-			cells.Add(MapSides.Top, new Cell(0, 7.2f, loc));
-			cells.Add(MapSides.Right, new Cell(7.2f, 0, loc));
+			cells.Add(MapSides.Bottom, new Cell(0, -7.2f, loc, 6));
+			cells.Add(MapSides.Left, new Cell(-7.2f, 0, loc, 6));
+			cells.Add(MapSides.Top, new Cell(0, 7.2f, loc, 6));
+			cells.Add(MapSides.Right, new Cell(7.2f, 0, loc, 6));
 		}
 
 		public override ICell GetTarget(Tracker tracker, out bool canOccupy)
@@ -23,6 +23,11 @@ namespace Map.MapObjects
 			var cell = circle.GetCell(0, tracker.mapSide);
 			canOccupy = cell.CanOccupy(tracker, true);
 			return cell;
+		}
+
+		public override ICell GetNextCell(MapSides side)
+		{
+			return circle.GetCell(0, side);
 		}
 	}
 }

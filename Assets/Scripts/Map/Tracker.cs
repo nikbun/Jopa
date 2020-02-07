@@ -54,7 +54,72 @@ namespace Map
 		public bool CanStartMove(int distance) 
 		{
 			m_Way.Clear();
-			return readyStartMoving = m_Map.CanMove(this, distance);
+			bool canMove = true;
+			if (m_CurrentCell.exitDistance > 0) 
+			{
+				canMove = m_CurrentCell.exitDistance == distance;
+				distance = canMove?1:0;
+			}
+			
+			ICell curCell = m_CurrentCell;
+			ICell nextCell = null;
+			List<ICell> extra = new List<ICell>(); 
+			bool rollback = false;
+			for (var i = distance; i > 0; i--) 
+			{
+				if (!rollback)
+				{
+					nextCell = m_Map.GetNextCell(curCell, mapSide, inCircle);
+				}
+				else 
+				{
+					nextCell = m_Map.GetPreviousCell(curCell, mapSide);
+				}
+
+				if (nextCell == null && curCell.location == MapLocations.Home) 
+				{
+					if (distance == i) // Если зафиксирована в доме
+					{
+						canMove = false;
+						break;
+					}
+					else 
+					{
+						rollback = true;
+						i++;
+						continue;
+					}
+				}
+					
+				if (i == 1)// Последняя ячейка за ход
+				{
+					if (nextCell.location == MapLocations.Cut)
+					{
+						extra = m_Map.GetExtra(nextCell);
+						canMove = nextCell.tracker?.mapSide != mapSide && extra[extra.Count - 1].tracker?.mapSide != mapSide;
+					}
+					else if (nextCell.location == MapLocations.Tolchok)
+					{
+						extra = m_Map.GetExtra(nextCell);
+						canMove = extra.Exists(e => e.tracker == null) || extra[extra.Count - 1].tracker?.mapSide != mapSide;
+						extra = new List<ICell>() { extra[0] };
+					}
+					else
+					{
+						canMove = nextCell.tracker?.mapSide != mapSide || nextCell.tracker == this; // Если там не свой
+					}
+				}
+				else 
+				{
+					canMove = nextCell.tracker == null || nextCell.tracker == this;
+				}
+				if (!canMove)
+					break;
+				m_Way.Add(nextCell);
+				curCell = nextCell;
+			}
+			m_Way.AddRange(extra);
+			return readyStartMoving = canMove;
 		}
 
 		public bool HasNextTarget()

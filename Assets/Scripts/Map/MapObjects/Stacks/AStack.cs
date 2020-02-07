@@ -52,6 +52,8 @@ namespace Map.MapObjects
 		/// <param name="pawn"></param>
 		/// <param name="canOccupy"></param>
 		/// <returns></returns>
-		public abstract ICell GetTarget(Tracker pawn, out bool canOccupy);
+		public abstract ICell GetTarget(Tracker tracker, out bool canOccupy);
+
+		public abstract ICell GetNextCell(MapSides side);
 	}
 }

@@ -10,8 +10,9 @@ namespace Map.MapObjects
 	public class CellCut : ICell
 	{
 		public Tracker tracker { get { return startCell.tracker; } set { startCell.tracker = value; } }
-		public MapLocations location { get { return startCell.location; } set { startCell.location = value; } }
+		public MapLocations location { get { return MapLocations.Cut; } set { startCell.location = value; } }
 		public Vector3 position { get { return startCell.position; } set { startCell.position = value; } }
+		public int exitDistance { get; }
 
 		private ICell startCell;
 		private List<Vector3> cut;
@@ -65,15 +66,15 @@ namespace Map.MapObjects
 			return way;
 		}
 
-		/// <summary>
-		/// Устанавливает пешку в начальную клетку
-		/// Так же решает проблемы зацикленности
-		/// Устанавливает пешку в начало у конечной клетки
-		/// </summary>
-		/// <param name="tracker"></param>
-		public void SetPawn(Tracker tracker)
+		public List<ICell> GetExtra() 
 		{
-			startCell.tracker = tracker;
+			var extra = new List<ICell>(); 
+			foreach (var c in cut)
+			{
+				extra.Add(new Cell(c, location));
+			}
+			extra.Add(endCell);
+			return extra;
 		}
 	}
 }

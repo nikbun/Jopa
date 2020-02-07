@@ -18,6 +18,11 @@ namespace Map.MapObjects
 		/// </summary>
 		Vector3 position { get; set; }
 		/// <summary>
+		/// Нужно число(которое выпало на кубике), чтобы перейти на следующую ячейку
+		/// 0 - Число не нужно
+		/// </summary>
+		int exitDistance { get; }
+		/// <summary>
 		/// Может ли пешка занять клетку
 		/// </summary>
 		/// <param name="tracker">Пешка пытающаяся занять клетку</param>

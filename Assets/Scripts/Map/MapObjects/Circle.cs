@@ -57,6 +57,27 @@ namespace Map.MapObjects
 			return canMove;
 		}
 
+		public ICell GetNextCell(ICell cell, MapSides side, bool inCircle = false) 
+		{
+			int end = GetIndex(0, side);
+			int index = cells.FindIndex(c => c == cell);
+			if (index == end && inCircle)
+				return home.GetNextCell(cell, side);
+			index++;
+			index %= cells.Count;
+			return cells[index];
+		}
+
+		public ICell GetPreviousCell(ICell cell, MapSides side) 
+		{
+			int end = GetIndex(0, side);
+			int index = cells.FindIndex(c => c == cell);
+			if (index == -1)
+				return cells[end];
+			index--; // Начальные точки не являються нулями
+			return cells[index];
+		}
+
 		public ICell GetCell(int cellNumber, MapSides mapSide = MapSides.Bottom)
 		{
 			return cells[GetIndex(cellNumber, mapSide)];
@@ -76,7 +97,7 @@ namespace Map.MapObjects
 		public void SetTolchek(Tolchok tolchek, int index)
 		{
 			index = GetIndex(index);
-			cells[index] = new CellTolchek(cells[index].position, tolchek);
+			//cells[index] = new CellTolchek(cells[index].position, tolchek);
 		}
 
 		private void InitCut(int start, int end, List<Vector3> cut)

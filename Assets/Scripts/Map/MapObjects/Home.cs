@@ -59,6 +59,25 @@ namespace Map.MapObjects
 			return canMove;
 		}
 
+		public ICell GetNextCell(ICell cell, MapSides side) 
+		{
+			int end = GetEnd(side);
+			int index = cells[side].FindIndex(c => c == cell);
+			if (index >= end)
+				return null;
+			index++;
+			return cells[side][index];
+		}
+
+		public ICell GetPreviousCell(ICell cell, MapSides side) 
+		{
+			int index = cells[side].FindIndex(c => c == cell);
+			index--;
+			if (index < 0)
+				return circle.GetPreviousCell(cell, side);
+			return cells[side][index];
+		}
+
 		private int GetEnd(MapSides mapSide)
 		{
 			for(int i = 3; i >= 0; i--)
