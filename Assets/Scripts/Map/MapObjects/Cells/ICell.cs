@@ -22,18 +22,5 @@ namespace Map.MapObjects
 		/// 0 - Число не нужно
 		/// </summary>
 		int exitDistance { get; }
-		/// <summary>
-		/// Может ли пешка занять клетку
-		/// </summary>
-		/// <param name="tracker">Пешка пытающаяся занять клетку</param>
-		/// <param name="lastCell">Полседняя ли это клетка на пути пешки</param>
-		/// <returns></returns>
-		bool CanOccupy(Tracker tracker, bool lastCell = false);
-		/// <summary>
-		/// Получение точек пути
-		/// </summary>
-		/// <param name="lastCell">Последняя ли это клетка</param>
-		/// <returns>Список проходимых точек</returns>
-		List<ICell> GetWay(bool lastCell = false);
 	}
 }

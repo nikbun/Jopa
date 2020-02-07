@@ -32,33 +32,6 @@ namespace Map.MapObjects
 			cells.Add(MapSides.Right, lCells);
 		}
 
-		public bool CanMove(Tracker tracker, int steps)
-		{
-			int end = GetEnd(tracker.mapSide);
-			int index = cells[tracker.mapSide].FindIndex(c => c.tracker == tracker);
-			bool canMove = true;
-			bool back = false;
-			if (index > end)
-				return false;
-			while (canMove && steps > 0)
-			{
-				if (index == end)
-					back = true;
-				if (back && index == 0)
-					return circle.CanMove(tracker, steps, true);
-				if (back)
-					index = --index + cells[tracker.mapSide].Count;
-				else
-					index++;
-				index %= cells[tracker.mapSide].Count;
-				var cell = cells[tracker.mapSide][index];
-				canMove = cell.CanOccupy(tracker, steps == 1);
-				tracker.UpdateWay(cell.GetWay().ToArray());
-				steps--;
-			}
-			return canMove;
-		}
-
 		public ICell GetNextCell(ICell cell, MapSides side) 
 		{
 			int end = GetEnd(side);

@@ -18,13 +18,6 @@ namespace Map.MapObjects
 			cells.Add(MapSides.Right, new Cell(7.2f, 0, loc, 6));
 		}
 
-		public override ICell GetTarget(Tracker tracker, out bool canOccupy)
-		{
-			var cell = circle.GetCell(0, tracker.mapSide);
-			canOccupy = cell.CanOccupy(tracker, true);
-			return cell;
-		}
-
 		public override ICell GetNextCell(MapSides side)
 		{
 			return circle.GetCell(0, side);

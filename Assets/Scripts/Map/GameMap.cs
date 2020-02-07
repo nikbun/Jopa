@@ -34,41 +34,6 @@ namespace Map
 			return jopa.GetCell(mapSide);
 		}
 
-		/// <summary>
-		/// Получает следующую клетку в толчке по трекеру
-		/// </summary>
-		/// <param name="tracker"></param>
-		/// <returns></returns>
-		public ICell GetNextTolchok(Tracker tracker)
-		{
-			return tolchek.GetTolchek(tracker);
-		}
-
-		/// <summary>
-		/// Определяет может ли пешка ходить на заданное количество шагов
-		/// </summary>
-		/// <param name="tracker"></param>
-		/// <param name="steps"></param>
-		/// <returns></returns>
-		public bool CanMove(Tracker tracker, int steps)
-		{
-			switch (tracker.location)
-			{
-				case MapLocations.Origin:
-					return origin.CanMove(tracker, steps);
-				case MapLocations.Circle:
-					return circle.CanMove(tracker, steps);
-				case MapLocations.Home:
-					return home.CanMove(tracker, steps);
-				case MapLocations.Jopa:
-					return jopa.CanMove(tracker, steps);
-				case MapLocations.Tolchok:
-					return tolchek.CanMove(tracker, steps);
-				default:
-					return false;
-			}
-		}
-
 		public ICell GetNextCell(ICell cell, MapSides side, bool inCircle = false) 
 		{
 			switch (cell.location)

@@ -34,29 +34,6 @@ namespace Map.MapObjects
 			shift.Add(MapSides.Right, 42);
 		}
 
-		public bool CanMove(Tracker tracker, int steps, bool back = false)
-		{
-			int end = GetIndex(0, tracker.mapSide);
-			int index = back?end+1:cells.FindIndex(c => c.tracker == tracker);
-			bool canMove = true;
-
-			while (canMove && steps > 0)
-			{
-				if (tracker.inCircle && index == end && !back)
-					return home.CanMove(tracker, steps);
-				if (back)
-					index = --index + cells.Count;
-				else
-					index++;
-				index %= cells.Count;
-				var cell = cells[index];
-				canMove = cell.CanOccupy(tracker, steps == 1);
-				tracker.UpdateWay(cell.GetWay(steps == 1).ToArray());
-				steps--;
-			}
-			return canMove;
-		}
-
 		public ICell GetNextCell(ICell cell, MapSides side, bool inCircle = false) 
 		{
 			int end = GetIndex(0, side);
@@ -89,18 +66,12 @@ namespace Map.MapObjects
 		/// <param name="index"> Индекс игрока </param>
 		/// <param name="mapSide"> Позиция игрока </param>
 		/// <returns> Настоящий индекс </returns>
-		public int GetIndex(int index, MapSides mapSide = MapSides.Bottom)
+		int GetIndex(int index, MapSides mapSide = MapSides.Bottom)
 		{
 			return (index + shift[mapSide]) % cells.Count;
 		}
 
-		public void SetTolchek(Tolchok tolchek, int index)
-		{
-			index = GetIndex(index);
-			//cells[index] = new CellTolchek(cells[index].position, tolchek);
-		}
-
-		private void InitCut(int start, int end, List<Vector3> cut)
+		void InitCut(int start, int end, List<Vector3> cut)
 		{
 			var startCell = cells[start];
 			var endCell = cells[end];

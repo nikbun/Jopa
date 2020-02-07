@@ -36,36 +36,6 @@ namespace Map.MapObjects
 			this.endCell = endCell;
 		}
 
-		public bool CanOccupy(Tracker tracker, bool lastCell = false)
-		{
-			return (lastCell || startCell.CanOccupy(tracker)) && (!lastCell || endCell.CanOccupyEnd(tracker));
-		}
-
-		/// <summary>
-		/// Проверка на незанятость конечной ячейки
-		/// Необходима, для избежания зациклености
-		/// </summary>
-		/// <param name="tracker"></param>
-		/// <returns></returns>
-		public bool CanOccupyEnd(Tracker tracker)
-		{
-			return startCell.CanOccupy(tracker, true);
-		}
-
-		public List<ICell> GetWay(bool lastCell = false)
-		{
-			var way = new List<ICell>() { this };
-			if (lastCell)
-			{
-				foreach (var c in cut) 
-				{
-					way.Add(new Cell(c, location));
-				}
-				way.Add(endCell);
-			}
-			return way;
-		}
-
 		public List<ICell> GetExtra() 
 		{
 			var extra = new List<ICell>(); 

@@ -23,16 +23,5 @@ namespace Map.MapObjects
 			this.position = position;
 			this.location = location;
 		}
-
-		public bool CanOccupy(Tracker tracker, bool lastCell = false)
-		{
-			return this.tracker == null || this.tracker.Equals(tracker)
-				|| lastCell && this.tracker?.mapSide != tracker.mapSide;
-		}
-
-		public List<ICell> GetWay(bool lastCell = false)
-		{
-			return new List<ICell>() { this };
-		}
 	}
 }

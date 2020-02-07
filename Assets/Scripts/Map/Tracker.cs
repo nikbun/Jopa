@@ -42,7 +42,7 @@ namespace Map
 			m_Way.Clear();
 			if (location == MapLocations.Tolchok)
 			{
-				m_Way.Add(m_Map.GetNextTolchok(this));
+				m_Way.Add(m_Map.GetNextCell(m_CurrentCell, mapSide));
 			}
 			else
 			{

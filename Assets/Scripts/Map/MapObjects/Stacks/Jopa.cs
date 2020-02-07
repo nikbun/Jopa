@@ -17,12 +17,6 @@ namespace Map.MapObjects
 			cells.Add(MapSides.Right, new Cell(1f, 0, loc, 6));
 		}
 
-		public override ICell GetTarget(Tracker tracker, out bool canOccupy)
-		{
-			canOccupy = true;
-			return origin.GetCell(tracker.mapSide);
-		}
-
 		public override ICell GetNextCell(MapSides side)
 		{
 			return origin.GetCell(side);
