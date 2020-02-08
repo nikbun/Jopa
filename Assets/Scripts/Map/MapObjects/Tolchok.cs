@@ -2,50 +2,59 @@
 using System.Collections.Generic;
 
 
-namespace Map.MapObjects
+namespace MapSpace.MapObjects
 {
 	public class Tolchok
 	{
-		public ICell exit;
-		private List<ICell> cells;
+		Cell _entrance;
+		Cell _exit;
+		List<Cell> _cells = new List<Cell>();
 
-		public Tolchok(List<ICell> cells, ICell exit)
+		public Tolchok(Cell entrance, Cell exit, params Cell[] cells)
 		{
-			cells[0].location = MapLocations.Tolchok;
-			this.cells = cells;
-			this.exit = exit;
+			_entrance = entrance;
+			_exit = exit;
+			_cells.AddRange(cells);
 		}
 
-		public ICell GetNextCell(ICell cell)
+		public Cell GetNextCell(Cell cell)
 		{
-			var index = cells.FindIndex(c => c == cell);
-			if (index < 1)
+			var index = _cells.IndexOf(cell);
+			if (index < 0)
 			{
 				return null;
 			}
-			else if (index >= 3)
+			else if (index >= 2)
 			{
-				return exit;
+				return _exit;
 			}
 			else
 			{
-				return cells[++index];
+				return _cells[++index];
 			}
 		}
 
-		public List<ICell> GetExtra(ICell cell) 
+		public List<Cell> GetExtra(Cell cell) 
 		{
-			var extra = new List<ICell>();
-			int index = cells.FindIndex(c => c == cell);
-			if (index >= 0) 
+			var extra = new List<Cell>();
+			if (_entrance == cell)
 			{
-				if (index == 0) // Вход не включаем в extra
-					index++;
-				for (var i = index; i < cells.Count; i++)
-					extra.Add(cells[index]);
-				extra.Add(exit);
+				extra.AddRange(_cells);
+				extra.Add(_exit);
+				return extra;
 			}
-			return extra;
+			else 
+			{
+				int index = _cells.IndexOf(cell);
+				if (index >= 0)
+				{
+					for (var i = index; i < _cells.Count; i++)
+						extra.Add(_cells[index]);
+					extra.Add(_exit);
+					return extra;
+				}
+			}
+			return null;
 		}
 	}
 }

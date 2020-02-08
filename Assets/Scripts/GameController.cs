@@ -1,7 +1,5 @@
 ﻿using UnityEngine;
-using UnityEngine.UI;
-using System.Collections;
-using Map;
+using MapSpace;
 using System.Collections.Generic;
 
 public class GameController : MonoBehaviour
@@ -12,12 +10,12 @@ public class GameController : MonoBehaviour
 	public List<GameObject> instancePlayers; // Экземпляры игроков
 	public Dice dice;
 
-	int m_CurrentPlayer = 0;
-	Dictionary<MapSides, Player> m_Players = new Dictionary<MapSides, Player>(); // Скрипты управления игроками
+	int _currentPlayer = 0;
+	Dictionary<Map.Sides, Player> _players = new Dictionary<Map.Sides, Player>(); // Скрипты управления игроками
 
 	void Start() 
 	{
-		new GameData(new GameMap(), gameSpeed);
+		GameData.Instanse.Update(new MapController(), gameSpeed);
 		dice.RollResult += StartTurn;
 		InitPlayers();
 	}
@@ -58,27 +56,27 @@ public class GameController : MonoBehaviour
 	{
 		for (int i = 0; i < countPlayers; i++)
 		{
-			var mapSide = (MapSides)i;
-			var player = Instantiate(instancePlayers[i], GameData.instance.map.GetOrigin(mapSide).position, Quaternion.identity);
+			var mapSide = (Map.Sides)i;
+			var player = Instantiate(instancePlayers[i], GameData.Instanse.mapController.GetMap(mapSide).GetOrigin().position, Quaternion.identity);
 			var sPlayer = player.GetComponent<Player>();
 			sPlayer.mapSide = mapSide;
 			sPlayer.EndTurn += EndTurn;
-			m_Players.Add(mapSide, sPlayer);
+			_players.Add(mapSide, sPlayer);
 		}
 	}
 
 	void StartTurn(int diceResult)
 	{
-		bool canMove = m_Players[(MapSides)m_CurrentPlayer].CanStartMove(diceResult);
+		bool canMove = _players[(Map.Sides)_currentPlayer].CanStartMove(diceResult);
 		if (!canMove)
 			NextTurn();
 	}
 
 	void EndTurn()
 	{
-		foreach (var key in m_Players.Keys)
+		foreach (var key in _players.Keys)
 		{
-			if (!m_Players[key].IsEndMove())
+			if (!_players[key].IsEndMove())
 				return;
 		}
 		NextTurn();
@@ -89,25 +87,7 @@ public class GameController : MonoBehaviour
 	/// </summary>
 	void NextTurn()
 	{
-		m_CurrentPlayer = (++m_CurrentPlayer) % countPlayers;
+		_currentPlayer = (++_currentPlayer) % countPlayers;
 		dice.UnlockRoll();
-	}
-}
-
-/// <summary>
-/// Класс для хранения общих данных
-/// </summary>
-public class GameData
-{
-	public static GameData instance;
-	public GameMap map { get; } // Игровая карта
-	public float speed { get; } // Скорость игры
-
-	public GameData(GameMap map, float speed = 10f) 
-	{
-		this.map = map;
-		this.speed = speed;
-		if (instance == null)
-			instance = this;
 	}
 }

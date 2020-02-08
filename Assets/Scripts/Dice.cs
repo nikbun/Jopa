@@ -9,8 +9,8 @@ public class Dice : MonoBehaviour
 	public delegate void RollDiceResult(int result);
 	public event RollDiceResult RollResult;
 
-	int m_Number = 1;
-	bool m_BlockRoll = false;
+	int _number = 1;
+	bool _blockRoll = false;
 
 	/// <summary>
 	/// Бростить кость
@@ -19,12 +19,12 @@ public class Dice : MonoBehaviour
 	/// /// <param name="number">Результат броска</param>
 	public void Roll(int number = 0)
 	{
-		if (!m_BlockRoll) 
+		if (!_blockRoll) 
 		{
-			m_BlockRoll = true;
-			m_Number = number > 0 ? number : Random.Range(1, 7);
-			textNumber.text = m_Number.ToString();
-			RollResult?.Invoke(m_Number);
+			_blockRoll = true;
+			_number = number > 0 ? number : Random.Range(1, 7);
+			textNumber.text = _number.ToString();
+			RollResult?.Invoke(_number);
 		}
 	}
 
@@ -34,6 +34,6 @@ public class Dice : MonoBehaviour
 	/// <param name="canRoll"></param>
 	public void UnlockRoll()
 	{
-		m_BlockRoll = false;
+		_blockRoll = false;
 	}
 }

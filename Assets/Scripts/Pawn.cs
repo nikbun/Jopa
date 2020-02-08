@@ -1,35 +1,35 @@
 ﻿using UnityEngine;
-using Map;
+using MapSpace;
 using System.Collections;
 
 public class Pawn : MonoBehaviour
 {
 	public SpriteRenderer outline; // Подсветка, в случае, если фишкой можно ходить
-	public MapSides mapSide;
+	public Map.Sides mapSide;
 
 	public delegate void PawnMovement();
 	public event PawnMovement StartMovement;
 	public event PawnMovement StopMovement;
 
-	Tracker m_Tracker;
-	bool m_Moving;
+	Tracker _tracker;
+	bool _moving;
 
 	public Pawn ()
 	{
-		StartMovement = () => m_Moving = true;
-		StopMovement = () => m_Moving = false;
+		StartMovement = () => _moving = true;
+		StopMovement = () => _moving = false;
 	}
 
 	void Start()
 	{
 		outline.enabled = false;
-		m_Tracker = new Tracker(mapSide, GameData.instance.map);
-		m_Tracker.ShiftMove += StartMove;
+		_tracker = new Tracker(mapSide, GameData.Instanse.mapController);
+		_tracker.ShiftMove += StartMove;
 	}
 
 	void OnMouseDown()
 	{
-		if (m_Tracker.readyStartMoving)
+		if (_tracker.readyStartMoving)
 		{
 			StartMove();
 		}
@@ -37,12 +37,12 @@ public class Pawn : MonoBehaviour
 
 	public bool CanStartMove(int distance) 
 	{
-		return outline.enabled = m_Tracker.CanStartMove(distance);
+		return outline.enabled = _tracker.CanStartMove(distance);
 	}
 
 	public void CancelStartMove()
 	{
-		m_Tracker.readyStartMoving = false;
+		_tracker.readyStartMoving = false;
 		outline.enabled = false;
 	}
 
@@ -58,14 +58,14 @@ public class Pawn : MonoBehaviour
 	IEnumerator Move()
 	{
 		StartMovement?.Invoke();
-		while (m_Tracker.HasNextTarget())
+		while (_tracker.HasNextTarget())
 		{
-			var target = m_Tracker.GetNextTarget();
+			var target = _tracker.GetNextTarget();
 
 			float sqrDistance;
 			do {
 				sqrDistance = (target.position - transform.position).sqrMagnitude;
-				transform.position = Vector3.MoveTowards(transform.position, target.position, GameData.instance.speed * Time.deltaTime);
+				transform.position = Vector3.MoveTowards(transform.position, target.position, GameData.Instanse.speed * Time.deltaTime);
 				yield return null;
 			} while (sqrDistance > float.Epsilon);
 		}
@@ -74,6 +74,6 @@ public class Pawn : MonoBehaviour
 
 	public bool IsMoving()
 	{
-		return m_Moving;
+		return _moving;
 	}
 }

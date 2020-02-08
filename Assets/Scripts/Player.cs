@@ -1,16 +1,16 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
-using Map;
+using MapSpace;
 
 public class Player : MonoBehaviour 
 {
 	public GameObject instancePawns;
-	public MapSides mapSide;
+	public Map.Sides mapSide;
 
 	public delegate void EndTurnDeleg();
 	public event EndTurnDeleg EndTurn;
 
-	List<Pawn> m_Pawns = new List<Pawn>();
+	List<Pawn> _pawns = new List<Pawn>();
 
 	void Start()
 	{
@@ -27,7 +27,7 @@ public class Player : MonoBehaviour
 			sPawn.mapSide = mapSide;
 			sPawn.StartMovement += OffOutlinePawns;
 			sPawn.StopMovement += EndTurn.Invoke;
-			m_Pawns.Add(sPawn);
+			_pawns.Add(sPawn);
 		}
 	}
 
@@ -39,7 +39,7 @@ public class Player : MonoBehaviour
 	public bool CanStartMove(int diceResult)
 	{
 		bool canMove = false;
-		foreach (var pawn in m_Pawns)
+		foreach (var pawn in _pawns)
 		{
 			canMove = pawn.CanStartMove(diceResult) || canMove; 
 		}
@@ -52,7 +52,7 @@ public class Player : MonoBehaviour
 	/// <returns></returns>
 	public bool IsEndMove()
 	{
-		return !m_Pawns.Exists(p => p.IsMoving());
+		return !_pawns.Exists(p => p.IsMoving());
 	}
 
 	/// <summary>
@@ -60,7 +60,7 @@ public class Player : MonoBehaviour
 	/// </summary>
 	void OffOutlinePawns()
 	{
-		foreach (var pawn in m_Pawns)
+		foreach (var pawn in _pawns)
 		{
 			pawn.CancelStartMove();
 		}

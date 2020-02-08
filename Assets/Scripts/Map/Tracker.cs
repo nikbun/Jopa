@@ -1,30 +1,28 @@
-﻿using Map.MapObjects;
+﻿using MapSpace.MapObjects;
 using System.Collections.Generic;
 
-namespace Map
+namespace MapSpace
 {
 	/// <summary>
 	/// Трекер для работы с картой
 	/// </summary>
 	public class Tracker
 	{
-		public MapSides mapSide { get; }
-		public MapLocations location { get { return m_CurrentCell.location; } }
-		public bool inCircle;
+		public Map.Sides side { get; }
 		public bool readyStartMoving;
 
 		public delegate void ShiftMoveDelg();
 		public event ShiftMoveDelg ShiftMove;
 
-		GameMap m_Map;
-		ICell m_CurrentCell;
-		List<ICell> m_Way = new List<ICell>();
+		Map _map;
+		Cell _currentCell;
+		List<Cell> _way = new List<Cell>();
 
-		public Tracker(MapSides mapSide, GameMap map) 
+		public Tracker(Map.Sides side, MapController mapController) 
 		{
-			this.mapSide = mapSide;
-			m_Map = map;
-			m_CurrentCell = map.GetOrigin(mapSide);
+			this.side = side;
+			_map = mapController.GetMap(side);
+			_currentCell = _map.GetOrigin();
 		}
 
 		/// <summary>
@@ -32,51 +30,53 @@ namespace Map
 		/// </summary>
 		/// <param name="toCell">Клетка в которую нужно переместиться</param>
 		/// <param name="lastCell">Последняя ли это клетка на пути</param>
-		public void UpdateWay(params ICell[] cells)
+		public void UpdateWay(params Cell[] cells)
 		{
-			m_Way.AddRange(cells);
+			_way.AddRange(cells);
 		}
 
 		public void Shift()
 		{
-			m_Way.Clear();
-			if (location == MapLocations.Tolchok)
+			_way.Clear();
+			if (_currentCell.location == Map.Locations.Tolchok)
 			{
-				m_Way.Add(m_Map.GetNextCell(m_CurrentCell, mapSide));
+				_way.Add(_map.GetNext(_currentCell));
 			}
 			else
 			{
-				m_Way.Add(m_Map.GetJopa(mapSide));
+				_way.Add(_map.GetJopa());
 			}
 			ShiftMove?.Invoke();
 		}
 
 		public bool CanStartMove(int distance) 
 		{
-			m_Way.Clear();
+			_way.Clear();
 			bool canMove = true;
-			if (m_CurrentCell.exitDistance > 0) 
+			if (_currentCell.exitDistance > 0) 
 			{
-				canMove = m_CurrentCell.exitDistance == distance;
+				canMove = _currentCell.exitDistance == distance;
 				distance = canMove?1:0;
 			}
 			
-			ICell curCell = m_CurrentCell;
-			ICell nextCell = null;
-			List<ICell> extra = new List<ICell>(); 
+			Cell curCell = _currentCell;
+			Cell nextCell = null;
+			List<Cell> extra = new List<Cell>(); 
 			bool rollback = false;
 			for (var i = distance; i > 0; i--) 
 			{
+				// Берем следующую ячейку
 				if (!rollback)
 				{
-					nextCell = m_Map.GetNextCell(curCell, mapSide, inCircle);
+					nextCell = _map.GetNext(curCell);
 				}
 				else 
 				{
-					nextCell = m_Map.GetPreviousCell(curCell, mapSide);
+					nextCell = _map.GetPrevious(curCell);
 				}
 
-				if (nextCell == null && curCell.location == MapLocations.Home) 
+				// Проверяем на дом
+				if (nextCell == null && curCell.location == Map.Locations.Home) 
 				{
 					if (distance == i) // Если зафиксирована в доме
 					{
@@ -90,65 +90,61 @@ namespace Map
 						continue;
 					}
 				}
-					
+
+				// Строим путь
 				if (i == 1)// Последняя ячейка за ход
 				{
-					if (nextCell.location == MapLocations.Cut)
+					if (nextCell.location == Map.Locations.Cut)
 					{
-						extra = m_Map.GetExtra(nextCell);
-						canMove = nextCell.tracker?.mapSide != mapSide && extra[extra.Count - 1].tracker?.mapSide != mapSide;
+						extra = _map.GetExtra(nextCell);
+						canMove = nextCell.tracker?.side != side && extra[extra.Count - 1].tracker?.side != side;
 					}
-					else if (nextCell.location == MapLocations.Tolchok)
+					else if (nextCell.location == Map.Locations.Tolchok)
 					{
-						extra = m_Map.GetExtra(nextCell);
-						canMove = extra.Exists(e => e.tracker == null) || extra[extra.Count - 1].tracker?.mapSide != mapSide;
-						extra = new List<ICell>() { extra[0] };
+						extra = _map.GetExtra(nextCell);
+						canMove = extra.Exists(e => e.tracker == null) || extra[extra.Count - 1].tracker?.side != side;
+						extra = nextCell == extra[0]? new List<Cell>() : new List<Cell>() { extra[0] };
 					}
 					else
 					{
-						canMove = nextCell.tracker?.mapSide != mapSide || nextCell.tracker == this; // Если там не свой
+						canMove = nextCell.tracker?.side != side || nextCell.tracker == this; // Если там не свой
 					}
 				}
-				else 
+				else // Не последняя ячейка за ход
 				{
 					canMove = nextCell.tracker == null || nextCell.tracker == this;
 				}
 				if (!canMove)
 					break;
-				m_Way.Add(nextCell);
+				_way.Add(nextCell);
 				curCell = nextCell;
 			}
-			m_Way.AddRange(extra);
+			_way.AddRange(extra);
 			return readyStartMoving = canMove;
 		}
 
 		public bool HasNextTarget()
 		{
-			return m_Way.Count > 0;
+			return _way.Count > 0;
 		}
 
-		public ICell GetNextTarget() 
+		public Cell GetNextTarget() 
 		{
-			if (!inCircle && location == MapLocations.Circle)
-				inCircle = true;
-			else if (inCircle && location == MapLocations.Jopa)
-				inCircle = false;
-
-			ICell cell = null;
+			Cell cell = null;
 			if (HasNextTarget()) 
 			{
-				cell = m_Way[0];
-				m_Way.RemoveAt(0);
+				cell = _way[0];
+				_way.RemoveAt(0);
 				if (cell != null) 
 				{
-					if (m_CurrentCell.tracker == this)
-						m_CurrentCell.tracker = null;
-					if (cell.location != MapLocations.Origin && cell.location != MapLocations.Jopa) 
+					if (_currentCell.tracker == this)
+						_currentCell.tracker = null;
+					if (cell.location != Map.Locations.Origin && cell.location != Map.Locations.Jopa) 
 					{
 						cell.tracker?.Shift();
 						cell.tracker = this;
 					}
-					m_CurrentCell = cell;
+					_currentCell = cell;
 					
 				}
 			}
