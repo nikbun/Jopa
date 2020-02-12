@@ -4,13 +4,17 @@ using UnityEngine.UI;
 
 public class Dice : MonoBehaviour
 {
+	public static Dice Instance { get; private set; }
 	public Text textNumber;
-
-	public delegate void RollDiceResult(int result);
-	public event RollDiceResult RollResult;
+	public Button button;
 
 	int _number = 1;
-	bool _blockRoll = false;
+	bool _blockRoll { get { return !button.interactable; } set { button.interactable = !value; } }
+
+	void Awake()
+	{
+		Instance = this;
+	}
 
 	/// <summary>
 	/// Бростить кость
@@ -19,12 +23,12 @@ public class Dice : MonoBehaviour
 	/// /// <param name="number">Результат броска</param>
 	public void Roll(int number = 0)
 	{
-		if (!_blockRoll) 
+		if (!_blockRoll && !GameController.Instance.IsPause()) 
 		{
 			_blockRoll = true;
 			_number = number > 0 ? number : Random.Range(1, 7);
 			textNumber.text = _number.ToString();
-			RollResult?.Invoke(_number);
+			GameController.Instance.StartTurn(_number);
 		}
 	}
 
@@ -32,8 +36,13 @@ public class Dice : MonoBehaviour
 	/// Разблокировать возможность бросить кость
 	/// </summary>
 	/// <param name="canRoll"></param>
-	public void UnlockRoll()
+	public void BlockRoll(bool block = true)
 	{
-		_blockRoll = false;
+		_blockRoll = block;
+	}
+
+	public void Reset() 
+	{
+		textNumber.text = "0";
 	}
 }

@@ -23,7 +23,7 @@ public class Pawn : MonoBehaviour
 	void Start()
 	{
 		outline.enabled = false;
-		_tracker = new Tracker(mapSide, GameData.Instanse.mapController);
+		_tracker = new Tracker(mapSide, GameData.Instance.mapController);
 		_tracker.ShiftMove += StartMove;
 	}
 
@@ -65,7 +65,7 @@ public class Pawn : MonoBehaviour
 			float sqrDistance;
 			do {
 				sqrDistance = (target.position - transform.position).sqrMagnitude;
-				transform.position = Vector3.MoveTowards(transform.position, target.position, GameData.Instanse.speed * Time.deltaTime);
+				transform.position = Vector3.MoveTowards(transform.position, target.position, GameData.Instance.pawnSpeed * Time.deltaTime);
 				yield return null;
 			} while (sqrDistance > float.Epsilon);
 		}
@@ -75,5 +75,12 @@ public class Pawn : MonoBehaviour
 	public bool IsMoving()
 	{
 		return _moving;
+	}
+
+	public void DestroyPawn() 
+	{
+		_tracker.DisposeTracker();
+		_tracker = null;
+		Destroy(gameObject);
 	}
 }

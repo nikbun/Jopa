@@ -65,4 +65,14 @@ public class Player : MonoBehaviour
 			pawn.CancelStartMove();
 		}
 	}
+
+	public void DestroyPlayer() 
+	{
+		foreach (var pawn in _pawns) 
+		{
+			pawn.DestroyPawn();
+		}
+		_pawns.Clear();
+		Destroy(gameObject);
+	}
 }

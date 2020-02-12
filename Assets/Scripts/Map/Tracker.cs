@@ -25,17 +25,7 @@ namespace MapSpace
 			_currentCell = _map.GetOrigin();
 		}
 
-		/// <summary>
-		/// Обновляет трасировку
-		/// </summary>
-		/// <param name="toCell">Клетка в которую нужно переместиться</param>
-		/// <param name="lastCell">Последняя ли это клетка на пути</param>
-		public void UpdateWay(params Cell[] cells)
-		{
-			_way.AddRange(cells);
-		}
-
-		public void Shift()
+		void Shift()
 		{
 			_way.Clear();
 			if (_currentCell.location == Map.Locations.Tolchok)
@@ -149,6 +139,14 @@ namespace MapSpace
 				}
 			}
 			return cell;
+		}
+
+		/// <summary>
+		/// Убирает трекер с карты
+		/// </summary>
+		public void DisposeTracker() 
+		{
+			_currentCell.tracker = null;
 		}
 	}
 }
