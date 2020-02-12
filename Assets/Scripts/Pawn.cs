@@ -77,6 +77,11 @@ public class Pawn : MonoBehaviour
 		return _moving;
 	}
 
+	public bool IsHome() 
+	{
+		return _tracker.IsHome();
+	}
+
 	public void DestroyPawn() 
 	{
 		_tracker.DisposeTracker();

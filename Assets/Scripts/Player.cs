@@ -4,8 +4,10 @@ using MapSpace;
 
 public class Player : MonoBehaviour 
 {
-	public GameObject instancePawns;
+	public string playerName;
+	public Color color;
 	public Map.Sides mapSide;
+	public GameObject samplePawn;
 
 	public delegate void EndTurnDeleg();
 	public event EndTurnDeleg EndTurn;
@@ -21,7 +23,7 @@ public class Player : MonoBehaviour
 	{
 		for (int i = 0; i < 4; i++)
 		{
-			var pawn = Instantiate(instancePawns, transform.position, Quaternion.Euler(90f, 0, 0));
+			var pawn = Instantiate(samplePawn, transform.position, Quaternion.Euler(90f, 0, 0));
 			pawn.transform.SetParent(transform);
 			var sPawn = pawn.GetComponent<Pawn>();
 			sPawn.mapSide = mapSide;
@@ -64,6 +66,16 @@ public class Player : MonoBehaviour
 		{
 			pawn.CancelStartMove();
 		}
+	}
+
+	public bool IsHome() 
+	{
+		bool isAllPawnsInHome = true;
+		foreach (var pawn in _pawns) 
+		{
+			 isAllPawnsInHome = isAllPawnsInHome && pawn.IsHome();
+		}
+		return isAllPawnsInHome;
 	}
 
 	public void DestroyPlayer() 

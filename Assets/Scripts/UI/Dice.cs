@@ -23,7 +23,7 @@ public class Dice : MonoBehaviour
 	/// /// <param name="number">Результат броска</param>
 	public void Roll(int number = 0)
 	{
-		if (!_blockRoll && !GameController.Instance.IsPause()) 
+		if (!_blockRoll && !GameController.Instance.IsPause() && GameController.Instance.IsPlaying()) 
 		{
 			_blockRoll = true;
 			_number = number > 0 ? number : Random.Range(1, 7);

@@ -4,7 +4,7 @@ using System.Linq;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class ChoosePlayersMenu : MonoBehaviour
+public class SelectPlayersMenu : MonoBehaviour
 {
 	public List<Dropdown> dropdowns;
 	public Button startButton;
@@ -15,6 +15,10 @@ public class ChoosePlayersMenu : MonoBehaviour
 	{
 		gameObject.SetActive(false);
 		_sampleDropdownsOptions = new List<Dropdown.OptionData>(dropdowns[0].options);
+		foreach (var dd in dropdowns)
+		{
+			dd.options = new List<Dropdown.OptionData>(_sampleDropdownsOptions);
+		}
 		startButton.interactable = false;
 	}
 
@@ -41,7 +45,8 @@ public class ChoosePlayersMenu : MonoBehaviour
 		{
 			if (dropdowns[i].value != 0)
 			{
-				players.Add((Map.Sides)i, GameData.Instance.samplePlayers[dropdowns[i].value - 1]);
+				var numberPlayer = _sampleDropdownsOptions.IndexOf(dropdowns[i].options[dropdowns[i].value]) - 1;// Номер игрока в списке
+				players.Add((Map.Sides)i, GameData.Instance.samplePlayers[numberPlayer]);
 			}
 		}
 		gameObject.SetActive(false);
@@ -58,8 +63,7 @@ public class ChoosePlayersMenu : MonoBehaviour
 		{
 			var currentOption = dd.options[dd.value];
 			dd.options = _sampleDropdownsOptions.Where(so => so == currentOption || !selectedOptions.Contains(so)).ToList();
-			if (selectedOptions.Count() != 1) // Без этого не работает выборка с первого раза
-				dd.value = dd.options.IndexOf(currentOption);
+			dd.value = dd.options.IndexOf(currentOption);
 
 			startButton.interactable = selectedOptions.Any();
 		}

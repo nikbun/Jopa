@@ -9,7 +9,7 @@ using UnityEditor;
 public class Menu : MonoBehaviour
 {
 	public static Menu Instance { get; private set; }
-	public ChoosePlayersMenu choosePlayersMenu;
+	public SelectPlayersMenu selectPlayersMenu;
 	public GameObject returnButton;
 
 	void Awake()
@@ -30,9 +30,9 @@ public class Menu : MonoBehaviour
 	/// </summary>
 	public void Back()
 	{
-		if (choosePlayersMenu.IsDisplay())
+		if (selectPlayersMenu.IsDisplay())
 		{
-			choosePlayersMenu.Back();
+			selectPlayersMenu.Back();
 		}
 		else if (GameController.Instance.IsPlaying())
 		{
@@ -49,7 +49,7 @@ public class Menu : MonoBehaviour
 	{
 		GameController.Instance.ResetGame();
 		gameObject.SetActive(false);
-		choosePlayersMenu.Display();
+		selectPlayersMenu.Display();
 	}
 
 	public void ExitGame()

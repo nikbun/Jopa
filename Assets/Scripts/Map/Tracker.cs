@@ -141,6 +141,11 @@ namespace MapSpace
 			return cell;
 		}
 
+		public bool IsHome() 
+		{
+			return _currentCell.location == Map.Locations.Home;
+		}
+
 		/// <summary>
 		/// Убирает трекер с карты
 		/// </summary>

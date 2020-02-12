@@ -13,7 +13,8 @@ public class GameController : MonoBehaviour
 
 	Dictionary<Map.Sides, Player> _players = new Dictionary<Map.Sides, Player>(); // Скрипты управления игроками
 	List<Map.Sides> _playersSides;
-	int _currentPlayer;
+	int _currentPlayerNumber;
+	Player _currentPlayer { get { return _players[_playersSides[_currentPlayerNumber]]; } }
 	int _countPlayers;
 	bool _isPlaying; // Идет игра
 	bool _pause; // Пауза игры
@@ -90,7 +91,7 @@ public class GameController : MonoBehaviour
 	/// </summary>
 	public void StartGame(Dictionary<Map.Sides, GameObject> samplePlayers)
 	{
-		_currentPlayer = 0;
+		_currentPlayerNumber = 0;
 		_countPlayers = samplePlayers.Count;
 		_playersSides = new List<Map.Sides>();
 		foreach (var instPlayer in samplePlayers)
@@ -106,6 +107,7 @@ public class GameController : MonoBehaviour
 		Dice.Instance.BlockRoll(false);
 		_isPlaying = true;
 		_pause = false;
+		GameStatus.Instance.SetCurrentPlayerName(_currentPlayer.playerName, _currentPlayer.color);
 	}
 
 	public bool IsPlaying()
@@ -129,7 +131,7 @@ public class GameController : MonoBehaviour
 	/// <param name="diceResult">Результат сброса кубика</param>
 	public void StartTurn(int diceResult)
 	{
-		bool canMove = _players[_playersSides[_currentPlayer]].CanStartMove(diceResult);
+		bool canMove = _currentPlayer.CanStartMove(diceResult);
 		if (!canMove)
 			EndTurn();
 	}
@@ -139,13 +141,19 @@ public class GameController : MonoBehaviour
 	/// </summary>
 	void EndTurn()
 	{
+		if (_currentPlayer.IsHome()) 
+		{
+			GameStatus.Instance.SetWinner(_currentPlayer.playerName, _currentPlayer.color);
+			_isPlaying = false;
+		}
 		foreach (var key in _players.Keys)
 		{
 			if (!_players[key].IsEndMove())
 				return;
 		}
-		_currentPlayer = (++_currentPlayer) % _countPlayers;
+		_currentPlayerNumber = (++_currentPlayerNumber) % _countPlayers;
 		Dice.Instance.BlockRoll(false);
+		GameStatus.Instance.SetCurrentPlayerName(_currentPlayer.playerName, _currentPlayer.color);
 	}
 
 	/// <summary>
@@ -160,5 +168,6 @@ public class GameController : MonoBehaviour
 		_players.Clear();
 		_isPlaying = false;
 		Dice.Instance.Reset();
+		GameStatus.Instance.Reset();
 	}
 }
