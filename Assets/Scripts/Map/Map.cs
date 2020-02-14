@@ -6,17 +6,17 @@ namespace MapSpace
 	public partial class Map
 	{
 		List<Cell> _way;
-		List<Tolchok> _tolchoks;
+		List<Fen> _fens;
 		List<Cut> _cuts;
 
-		Map(List<Cell> way, List<Tolchok> tolchoks, List<Cut> cuts)
+		Map(List<Cell> way, List<Fen> fens, List<Cut> cuts)
 		{
 			_way = way;
-			_tolchoks = tolchoks;
+			_fens = fens;
 			_cuts = cuts;
 		}
 
-		public Cell GetJopa() 
+		public Cell GetQuagmire() 
 		{
 			return _way[0];
 		}
@@ -43,9 +43,9 @@ namespace MapSpace
 				}
 				else
 				{
-					foreach (var tolchock in _tolchoks)
+					foreach (var fen in _fens)
 					{
-						var nextCell = tolchock.GetNextCell(cell);
+						var nextCell = fen.GetNextCell(cell);
 						if (nextCell != null)
 							return nextCell;
 					}
@@ -83,15 +83,15 @@ namespace MapSpace
 			List<Cell> extra;
 			switch (cell.location) 
 			{
-				case Map.Locations.Tolchok:
-					foreach (var tolchock in _tolchoks)
+				case Locations.Fen:
+					foreach (var fen in _fens)
 					{
-						extra = tolchock.GetExtra(cell);
+						extra = fen.GetExtra(cell);
 						if (extra != null)
 							return extra;
 					}
 					break;
-				case Map.Locations.Cut:
+				case Locations.Cut:
 					foreach (var cut in _cuts)
 					{
 						extra = cut.GetExtra(cell);
@@ -126,8 +126,8 @@ namespace MapSpace
 			Origin,
 			Circle,
 			Home,
-			Jopa,
-			Tolchok,
+			Quagmire,
+			Fen,
 			Cut
 		}
 

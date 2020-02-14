@@ -11,11 +11,11 @@ namespace MapSpace
 		public class MapBuilder 
 		{
 			Dictionary<int, Cell> _coordinates;
-			Cell _jopa;
+			Cell _quagmire;
 			Cell _origin;
 			List<Cell> _circle;
 			List<Cell> _home;
-			List<Tolchok> _tolchoks = new List<Tolchok>();
+			List<Fen> _fens = new List<Fen>();
 			List<Cut> _cuts = new List<Cut>();
 
 			public MapBuilder(Dictionary<int, Cell> coordinates) 
@@ -23,9 +23,9 @@ namespace MapSpace
 				_coordinates = coordinates;
 			}
 
-			public MapBuilder Jopa(int index) 
+			public MapBuilder Quagmire(int index) 
 			{
-				_jopa = _coordinates[index];
+				_quagmire = _coordinates[index];
 				return this;
 			}
 
@@ -55,14 +55,14 @@ namespace MapSpace
 				return this;
 			}
 
-			public MapBuilder Tolchok(int entranceIndex, int exitIndex, params int[] tolchockIndexes)
+			public MapBuilder Fen(int entranceIndex, int exitIndex, params int[] fenIndexes)
 			{
-				var tolcheck = new List<Cell>();
-				foreach (var index in tolchockIndexes) 
+				var fen = new List<Cell>();
+				foreach (var index in fenIndexes) 
 				{
-					tolcheck.Add(_coordinates[index]);
+					fen.Add(_coordinates[index]);
 				}
-				_tolchoks.Add(new Tolchok(_coordinates[entranceIndex], _coordinates[exitIndex], tolcheck.ToArray()));
+				_fens.Add(new Fen(_coordinates[entranceIndex], _coordinates[exitIndex], fen.ToArray()));
 				return this;
 			}
 
@@ -80,11 +80,11 @@ namespace MapSpace
 			public Map Build() 
 			{
 				var way = new List<Cell>();
-				way.Add(_jopa);
+				way.Add(_quagmire);
 				way.Add(_origin);
 				way.AddRange(_circle);
 				way.AddRange(_home);
-				return new Map(way, _tolchoks, _cuts);
+				return new Map(way, _fens, _cuts);
 			}
 		}
 	}

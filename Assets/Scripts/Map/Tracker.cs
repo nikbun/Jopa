@@ -28,13 +28,13 @@ namespace MapSpace
 		void Shift()
 		{
 			_way.Clear();
-			if (_currentCell.location == Map.Locations.Tolchok)
+			if (_currentCell.location == Map.Locations.Fen)
 			{
 				_way.Add(_map.GetNext(_currentCell));
 			}
 			else
 			{
-				_way.Add(_map.GetJopa());
+				_way.Add(_map.GetQuagmire());
 			}
 			ShiftMove?.Invoke();
 		}
@@ -89,7 +89,7 @@ namespace MapSpace
 						extra = _map.GetExtra(nextCell);
 						canMove = nextCell.tracker?.side != side && extra[extra.Count - 1].tracker?.side != side;
 					}
-					else if (nextCell.location == Map.Locations.Tolchok)
+					else if (nextCell.location == Map.Locations.Fen)
 					{
 						extra = _map.GetExtra(nextCell);
 						canMove = extra.Exists(e => e.tracker == null) || extra[extra.Count - 1].tracker?.side != side;
@@ -129,7 +129,7 @@ namespace MapSpace
 				{
 					if (_currentCell.tracker == this)
 						_currentCell.tracker = null;
-					if (cell.location != Map.Locations.Origin && cell.location != Map.Locations.Jopa) 
+					if (cell.location != Map.Locations.Origin && cell.location != Map.Locations.Quagmire) 
 					{
 						cell.tracker?.Shift();
 						cell.tracker = this;

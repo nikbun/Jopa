@@ -4,13 +4,13 @@ using System.Collections.Generic;
 
 namespace MapSpace.MapObjects
 {
-	public class Tolchok
+	public class Fen
 	{
 		Cell _entrance;
 		Cell _exit;
 		List<Cell> _cells = new List<Cell>();
 
-		public Tolchok(Cell entrance, Cell exit, params Cell[] cells)
+		public Fen(Cell entrance, Cell exit, params Cell[] cells)
 		{
 			_entrance = entrance;
 			_exit = exit;
