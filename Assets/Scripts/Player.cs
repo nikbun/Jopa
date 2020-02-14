@@ -2,10 +2,11 @@
 using UnityEngine;
 using MapSpace;
 
-public class Player : MonoBehaviour 
+public class Player : MonoBehaviour
 {
 	public string playerName;
 	public Color color;
+	public Type type;
 	public Map.Sides mapSide;
 	public GameObject samplePawn;
 
@@ -13,6 +14,8 @@ public class Player : MonoBehaviour
 	public event EndTurnDeleg EndTurn;
 
 	List<Pawn> _pawns = new List<Pawn>();
+
+	public bool EndInitialization { get { return _pawns.Count > 0 && _pawns.TrueForAll(p => p.EndInitialization); } }
 
 	void Start()
 	{
@@ -38,14 +41,20 @@ public class Player : MonoBehaviour
 	/// </summary>
 	/// <param name="diceResult">Результат сброса кубика</param>
 	/// <returns></returns>
-	public bool CanStartMove(int diceResult)
+	public void StartMove(int diceResult)
 	{
 		bool canMove = false;
+		var movePawns = new List<Pawn>();
 		foreach (var pawn in _pawns)
 		{
-			canMove = pawn.CanStartMove(diceResult) || canMove; 
+			canMove = pawn.CanStartMove(diceResult) || canMove;
+			if (canMove)
+				movePawns.Add(pawn);
 		}
-		return canMove;
+		if (type == Type.AI && movePawns.Count > 0)
+			movePawns[Random.Range(0, movePawns.Count)].StartMove();
+		if (!canMove)
+			EndTurn?.Invoke();
 	}
 
 	/// <summary>
@@ -68,23 +77,29 @@ public class Player : MonoBehaviour
 		}
 	}
 
-	public bool IsHome() 
+	public bool IsHome()
 	{
 		bool isAllPawnsInHome = true;
-		foreach (var pawn in _pawns) 
+		foreach (var pawn in _pawns)
 		{
-			 isAllPawnsInHome = isAllPawnsInHome && pawn.IsHome();
+			isAllPawnsInHome = isAllPawnsInHome && pawn.IsHome();
 		}
 		return isAllPawnsInHome;
 	}
 
-	public void DestroyPlayer() 
+	public void DestroyPlayer()
 	{
-		foreach (var pawn in _pawns) 
+		foreach (var pawn in _pawns)
 		{
 			pawn.DestroyPawn();
 		}
 		_pawns.Clear();
 		Destroy(gameObject);
+	}
+
+	public enum Type
+	{
+		Player,
+		AI
 	}
 }

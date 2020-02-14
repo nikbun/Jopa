@@ -14,6 +14,8 @@ public class Pawn : MonoBehaviour
 	Tracker _tracker;
 	bool _moving;
 
+	public bool EndInitialization { get; private set; }
+
 	public Pawn ()
 	{
 		StartMovement = () => _moving = true;
@@ -25,6 +27,7 @@ public class Pawn : MonoBehaviour
 		outline.enabled = false;
 		_tracker = new Tracker(mapSide, GameData.Instance.mapController);
 		_tracker.ShiftMove += StartMove;
+		EndInitialization = true;
 	}
 
 	void OnMouseDown()

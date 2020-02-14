@@ -26,7 +26,7 @@ public class Menu : MonoBehaviour
 	}
 
 	/// <summary>
-	/// Перейти на шаг назад в меню, либо выйти из игры, если идет процесс игры
+	/// Выйти из меню, либо на шаг назад в меню
 	/// </summary>
 	public void Back()
 	{

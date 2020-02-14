@@ -4,11 +4,15 @@ using UnityEngine.UI;
 
 public class Dice : MonoBehaviour
 {
-	public static Dice Instance { get; private set; }
 	public Text textNumber;
 	public Button button;
 
+	public delegate void RollDiceResult(int result);
+	public event RollDiceResult RollResult;
+
 	int _number = 1;
+
+	public static Dice Instance { get; private set; }
 	bool _blockRoll { get { return !button.interactable; } set { button.interactable = !value; } }
 
 	void Awake()
@@ -28,7 +32,7 @@ public class Dice : MonoBehaviour
 			_blockRoll = true;
 			_number = number > 0 ? number : Random.Range(1, 7);
 			textNumber.text = _number.ToString();
-			GameController.Instance.StartTurn(_number);
+			RollResult?.Invoke(_number);
 		}
 	}
 
@@ -36,7 +40,7 @@ public class Dice : MonoBehaviour
 	/// Разблокировать возможность бросить кость
 	/// </summary>
 	/// <param name="canRoll"></param>
-	public void BlockRoll(bool block = true)
+	public void Block(bool block)
 	{
 		_blockRoll = block;
 	}

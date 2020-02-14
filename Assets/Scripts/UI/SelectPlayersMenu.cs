@@ -6,18 +6,26 @@ using UnityEngine.UI;
 
 public class SelectPlayersMenu : MonoBehaviour
 {
-	public List<Dropdown> dropdowns;
+	[Header("Порядок списков(side) B.L.T.R.")]
+	[Tooltip("Порядок: Bottom, Left, Top, Right")]
+	public List<Dropdown> colorDropdowns;
+	[Tooltip("Порядок: Bottom, Left, Top, Right")]
+	public List<Dropdown> typeDropdowns;
 	public Button startButton;
 
 	List<Dropdown.OptionData> _sampleDropdownsOptions; // Список опций. Порядок(цвет): З.К.С.Ж.
 
-	void Start()
+	private void Awake()
 	{
 		gameObject.SetActive(false);
-		_sampleDropdownsOptions = new List<Dropdown.OptionData>(dropdowns[0].options);
-		foreach (var dd in dropdowns)
+	}
+
+	void Start()
+	{
+		_sampleDropdownsOptions = new List<Dropdown.OptionData>(colorDropdowns[0].options);
+		foreach (var cdd in colorDropdowns)
 		{
-			dd.options = new List<Dropdown.OptionData>(_sampleDropdownsOptions);
+			cdd.options = new List<Dropdown.OptionData>(_sampleDropdownsOptions);
 		}
 		startButton.interactable = false;
 	}
@@ -40,30 +48,29 @@ public class SelectPlayersMenu : MonoBehaviour
 	
 	public void StartGame()
 	{
-		Dictionary<Map.Sides, GameObject> players = new Dictionary<Map.Sides, GameObject>();
-		for (int i = 0; i < dropdowns.Count; i++)
+		for (int i = 0; i < colorDropdowns.Count; i++)
 		{
-			if (dropdowns[i].value != 0)
+			if (colorDropdowns[i].value != 0)
 			{
-				var numberPlayer = _sampleDropdownsOptions.IndexOf(dropdowns[i].options[dropdowns[i].value]) - 1;// Номер игрока в списке
-				players.Add((Map.Sides)i, GameData.Instance.samplePlayers[numberPlayer]);
+				var numberPlayer = _sampleDropdownsOptions.IndexOf(colorDropdowns[i].options[colorDropdowns[i].value]) - 1;// Номер игрока в списке
+				GameController.Instance.AddPlayer(GameData.Instance.samplePlayers[numberPlayer], (Map.Sides)i, (Player.Type)typeDropdowns[i].value);
 			}
 		}
 		gameObject.SetActive(false);
-		GameController.Instance.StartGame(players);
+		GameController.Instance.StartGame();
 	}
 
 	/// <summary>
-	/// Обновляем списки выбора игроков
+	/// Обновляем списки выбора цвета игроков
 	/// </summary>
-	public void UpdateDropdowns()
+	public void UpdateColorDropdowns()
 	{
-		var selectedOptions = dropdowns.Where(dd => dd.value != 0).Select(dd => dd.options[dd.value]);
-		foreach (var dd in dropdowns)
+		var selectedOptions = colorDropdowns.Where(dd => dd.value != 0).Select(dd => dd.options[dd.value]);
+		foreach (var cdd in colorDropdowns)
 		{
-			var currentOption = dd.options[dd.value];
-			dd.options = _sampleDropdownsOptions.Where(so => so == currentOption || !selectedOptions.Contains(so)).ToList();
-			dd.value = dd.options.IndexOf(currentOption);
+			var currentOption = cdd.options[cdd.value];
+			cdd.options = _sampleDropdownsOptions.Where(so => so == currentOption || !selectedOptions.Contains(so)).ToList();
+			cdd.value = cdd.options.IndexOf(currentOption);
 
 			startButton.interactable = selectedOptions.Any();
 		}

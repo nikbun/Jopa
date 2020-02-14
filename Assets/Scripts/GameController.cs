@@ -4,20 +4,19 @@ using UnityEngine;
 
 public class GameController : MonoBehaviour
 {
-	public static GameController Instance { get; private set; }
 #if UNITY_EDITOR
 	public bool quickStart; // Игроки назначаються автоматически
 	[Range(1, 4)]
 	public int countPlayers = 4;
 #endif
 
-	Dictionary<Map.Sides, Player> _players = new Dictionary<Map.Sides, Player>(); // Скрипты управления игроками
-	List<Map.Sides> _playersSides;
+	List<Player> _players = new List<Player>(); // Скрипты управления игроками
 	int _currentPlayerNumber;
-	Player _currentPlayer { get { return _players[_playersSides[_currentPlayerNumber]]; } }
-	int _countPlayers;
 	bool _isPlaying; // Идет игра
 	bool _pause; // Пауза игры
+
+	public static GameController Instance { get; private set; }
+	Player CurrentPlayer { get { return _players.Count == 0 ? null : _players[_currentPlayerNumber]; } }
 
 	void Awake()
 	{
@@ -27,19 +26,18 @@ public class GameController : MonoBehaviour
 	void Start()
 	{
 		Instantiate(GameData.Instance.gameUI);
-		Dice.Instance.BlockRoll();
+		Dice.Instance.RollResult += StartTurn;
+		Dice.Instance.Block(true);
 
 #if UNITY_EDITOR
 		// Запуск быстрого старта для отладки
 		if (quickStart)
 		{
-			var players = new Dictionary<Map.Sides, GameObject>();
-			var instPlayers = GameData.Instance.samplePlayers;
 			for (int i = 0; i < countPlayers; i++)
 			{
-				players.Add((Map.Sides)i, instPlayers[i]);
+				AddPlayer(GameData.Instance.samplePlayers[i], (Map.Sides)i);
 			}
-			StartGame(players);
+			StartGame();
 			Menu.Instance.Back();
 		}
 #endif
@@ -47,6 +45,10 @@ public class GameController : MonoBehaviour
 
 	void Update()
 	{
+		if (CurrentPlayer != null && CurrentPlayer.type == Player.Type.AI && CurrentPlayer.EndInitialization)
+		{
+			Dice.Instance.Roll();
+		}
 		// Бросок кости
 		if (Input.GetKeyUp(KeyCode.Space))
 		{
@@ -89,25 +91,42 @@ public class GameController : MonoBehaviour
 	/// <summary>
 	/// Устанавливаем игроков на стартовые позиции
 	/// </summary>
-	public void StartGame(Dictionary<Map.Sides, GameObject> samplePlayers)
+	public void StartGame()
 	{
 		_currentPlayerNumber = 0;
-		_countPlayers = samplePlayers.Count;
-		_playersSides = new List<Map.Sides>();
-		foreach (var instPlayer in samplePlayers)
-		{
-			var mapSide = instPlayer.Key;
-			var player = Instantiate(instPlayer.Value, GameData.Instance.mapController.GetMap(mapSide).GetOrigin().position, Quaternion.identity);
-			var sPlayer = player.GetComponent<Player>();
-			sPlayer.mapSide = mapSide;
-			sPlayer.EndTurn += EndTurn;
-			_players.Add(mapSide, sPlayer);
-			_playersSides.Add(mapSide);
-		}
-		Dice.Instance.BlockRoll(false);
+		Dice.Instance.Block(false);
 		_isPlaying = true;
 		_pause = false;
-		GameStatus.Instance.SetCurrentPlayerName(_currentPlayer.playerName, _currentPlayer.color);
+		GameStatus.Instance.SetCurrentPlayerName(CurrentPlayer.playerName, CurrentPlayer.color);
+	}
+
+	public void AddPlayer(GameObject player, Map.Sides side, Player.Type type = Player.Type.Player) 
+	{
+		var oldPlayer = _players.Find(p => p.mapSide == side);
+		if (oldPlayer != null)
+			oldPlayer.DestroyPlayer();
+
+		var goPlayer = Instantiate(player, GameData.Instance.mapController.GetMap(side).GetOrigin().position, Quaternion.identity);
+		var sPlayer = goPlayer.GetComponent<Player>();
+		sPlayer.type = type;
+		sPlayer.mapSide = side;
+		sPlayer.EndTurn += EndTurn;
+		_players.Add(sPlayer);
+	}
+
+	/// <summary>
+	/// Сбросить игру до начального состояния
+	/// </summary>
+	public void ResetGame()
+	{
+		foreach (var player in _players)
+		{
+			player.DestroyPlayer();
+		}
+		_players.Clear();
+		_isPlaying = false;
+		Dice.Instance.Reset();
+		GameStatus.Instance.Reset();
 	}
 
 	public bool IsPlaying()
@@ -129,11 +148,9 @@ public class GameController : MonoBehaviour
 	/// Начать ход
 	/// </summary>
 	/// <param name="diceResult">Результат сброса кубика</param>
-	public void StartTurn(int diceResult)
+	void StartTurn(int diceResult)
 	{
-		bool canMove = _currentPlayer.CanStartMove(diceResult);
-		if (!canMove)
-			EndTurn();
+		CurrentPlayer.StartMove(diceResult);
 	}
 
 	/// <summary>
@@ -141,33 +158,27 @@ public class GameController : MonoBehaviour
 	/// </summary>
 	void EndTurn()
 	{
-		if (_currentPlayer.IsHome()) 
-		{
-			GameStatus.Instance.SetWinner(_currentPlayer.playerName, _currentPlayer.color);
-			_isPlaying = false;
-		}
-		foreach (var key in _players.Keys)
-		{
-			if (!_players[key].IsEndMove())
-				return;
-		}
-		_currentPlayerNumber = (++_currentPlayerNumber) % _countPlayers;
-		Dice.Instance.BlockRoll(false);
-		GameStatus.Instance.SetCurrentPlayerName(_currentPlayer.playerName, _currentPlayer.color);
-	}
-
-	/// <summary>
-	/// Сбросить игру до начального состояния
-	/// </summary>
-	public void ResetGame()
-	{
+		// Все игроки закончили ход?
 		foreach (var player in _players)
 		{
-			player.Value.DestroyPlayer();
+			if (!player.IsEndMove())
+				return;
 		}
-		_players.Clear();
-		_isPlaying = false;
-		Dice.Instance.Reset();
-		GameStatus.Instance.Reset();
+		// Текущий игрок добрался до дома?
+		if (CurrentPlayer.IsHome())
+		{
+			GameStatus.Instance.SetWinner(CurrentPlayer.playerName, CurrentPlayer.color);
+			_isPlaying = false;
+		}
+		// Установка следующего игрока
+		_currentPlayerNumber = (++_currentPlayerNumber) % _players.Count;
+		
+		Dice.Instance.Block(false);
+		GameStatus.Instance.SetCurrentPlayerName(CurrentPlayer.playerName, CurrentPlayer.color);
+
+		if (CurrentPlayer.type == Player.Type.AI)
+		{
+			Dice.Instance.Roll();
+		}
 	}
 }
