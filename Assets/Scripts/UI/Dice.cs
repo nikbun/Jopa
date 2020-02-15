@@ -1,11 +1,11 @@
 ﻿using UnityEngine;
 using UnityEngine.UI;
-
+using System.Collections.Generic;
+using UnityEngine.EventSystems;
 
 public class Dice : MonoBehaviour
 {
-	public Text textNumber;
-	public Button button;
+	public Animator animator;
 
 	public delegate void RollDiceResult(int result);
 	public event RollDiceResult RollResult;
@@ -13,7 +13,7 @@ public class Dice : MonoBehaviour
 	int _number = 1;
 
 	public static Dice Instance { get; private set; }
-	bool _blockRoll { get { return !button.interactable; } set { button.interactable = !value; } }
+	bool _blockRoll;
 
 	void Awake()
 	{
@@ -27,13 +27,29 @@ public class Dice : MonoBehaviour
 	/// /// <param name="number">Результат броска</param>
 	public void Roll(int number = 0)
 	{
-		if (!_blockRoll && !GameController.Instance.IsPause() && GameController.Instance.IsPlaying()) 
+		if (!_blockRoll && !GameController.Instance.IsPause() && GameController.Instance.IsPlaying())
 		{
-			_blockRoll = true;
 			_number = number > 0 ? number : Random.Range(1, 7);
-			textNumber.text = _number.ToString();
-			RollResult?.Invoke(_number);
+			Block(true);
 		}
+	}
+
+	/// <summary>
+	/// Обновляет кубика на анимации
+	/// Вызываеться анимацией
+	/// </summary>
+	public void UpdateAnimNumber() 
+	{
+		animator.SetInteger("Number", _number);
+	}
+
+	/// <summary>
+	/// Резутьтат выполнения броска
+	/// Вызываеться анимацией
+	/// </summary>
+	public void Result()
+	{
+		RollResult?.Invoke(_number);
 	}
 
 	/// <summary>
@@ -43,10 +59,6 @@ public class Dice : MonoBehaviour
 	public void Block(bool block)
 	{
 		_blockRoll = block;
-	}
-
-	public void Reset() 
-	{
-		textNumber.text = "0";
+		animator.SetBool("Jump", !block);
 	}
 }

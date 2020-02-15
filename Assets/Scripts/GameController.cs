@@ -14,6 +14,8 @@ public class GameController : MonoBehaviour
 	int _currentPlayerNumber;
 	bool _isPlaying; // Идет игра
 	bool _pause; // Пауза игры
+	float _reactionAI = 0.5f; // Реакция AI в сек, чтобы успевали уследить игрок и проиграться анимация
+	float _timeToReactAI = 0;
 
 	public static GameController Instance { get; private set; }
 	Player CurrentPlayer { get { return _players.Count == 0 ? null : _players[_currentPlayerNumber]; } }
@@ -45,9 +47,14 @@ public class GameController : MonoBehaviour
 
 	void Update()
 	{
-		if (CurrentPlayer != null && CurrentPlayer.type == Player.Type.AI && CurrentPlayer.EndInitialization)
+		if (_timeToReactAI <= 0 && CurrentPlayer != null && CurrentPlayer.type == Player.Type.AI && CurrentPlayer.EndInitialization)
 		{
 			Dice.Instance.Roll();
+			_timeToReactAI = _reactionAI;
+		}
+		else
+		{
+			_timeToReactAI -= Time.deltaTime;
 		}
 		// Бросок кости
 		if (Input.GetKeyUp(KeyCode.Space))
@@ -125,7 +132,6 @@ public class GameController : MonoBehaviour
 		}
 		_players.Clear();
 		_isPlaying = false;
-		Dice.Instance.Reset();
 		GameStatus.Instance.Reset();
 	}
 
@@ -175,10 +181,6 @@ public class GameController : MonoBehaviour
 		
 		Dice.Instance.Block(false);
 		GameStatus.Instance.SetCurrentPlayerName(CurrentPlayer.playerName, CurrentPlayer.color);
-
-		if (CurrentPlayer.type == Player.Type.AI)
-		{
-			Dice.Instance.Roll();
-		}
+		_timeToReactAI = _reactionAI;
 	}
 }

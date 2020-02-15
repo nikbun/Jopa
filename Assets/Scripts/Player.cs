@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using MapSpace;
 
@@ -43,17 +44,11 @@ public class Player : MonoBehaviour
 	/// <returns></returns>
 	public void StartMove(int diceResult)
 	{
-		bool canMove = false;
-		var movePawns = new List<Pawn>();
-		foreach (var pawn in _pawns)
-		{
-			canMove = pawn.CanStartMove(diceResult) || canMove;
-			if (canMove)
-				movePawns.Add(pawn);
-		}
-		if (type == Type.AI && movePawns.Count > 0)
-			movePawns[Random.Range(0, movePawns.Count)].StartMove();
-		if (!canMove)
+		var canMovePawns = _pawns.Where(p => p.CanStartMove(diceResult)).ToList();
+
+		if (type == Type.AI && canMovePawns.Any())
+			canMovePawns[Random.Range(0, canMovePawns.Count)].StartMove();
+		if (!canMovePawns.Any())
 			EndTurn?.Invoke();
 	}
 
