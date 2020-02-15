@@ -16,7 +16,7 @@
 <a name="Игровое_поле"></a>
 ## Игровое поле
 
-![Тут должно быть игровое поле](https://raw.githubusercontent.com/nikbun/Quagmire/master/Assets/Images/Map.png "Игровое поле")
+![Тут должно быть игровое поле](https://raw.githubusercontent.com/nikbun/Quagmire/master/Assets/Sprites/Map.png "Игровое поле")
 
 <a name="Правила_игры"></a>
 ## Правила игры
