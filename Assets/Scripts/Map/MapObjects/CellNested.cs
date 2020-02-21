@@ -4,12 +4,14 @@
 	/// Ячейка с ячейкой внутри, нужна чтобы разделить ячейки, но создать общий трекер
 	/// Необходим в случае пересечения двух ячеек в одной точке
 	/// </summary>
-	public class CellNested : Cell
+	public sealed class CellNested : Cell
 	{
-		public override Tracker tracker { get { return _innerCell.tracker; } set { _innerCell.tracker = value; } }
 		Cell _innerCell;
+
+		public override Tracker Tracker { get { return _innerCell.Tracker; } set { _innerCell.Tracker = value; } }
+
 		public CellNested(Cell innerCell) 
-			: base(innerCell.position.x, innerCell.position.z, innerCell.location, innerCell.exitDistance)
+			: base(innerCell.Position.x, innerCell.Position.z, innerCell.Location, innerCell.ExitDistance)
 		{
 			_innerCell = innerCell;
 		}

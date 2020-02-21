@@ -5,39 +5,51 @@ using UnityEngine;
 public class GameController : MonoBehaviour
 {
 #if UNITY_EDITOR
-	public bool quickStart; // Игроки назначаються автоматически
+	[Tooltip("Игроки назначаються автоматически при старте")]
+	[SerializeField] bool _quickStart;
+
 	[Range(1, 4)]
-	public int countPlayers = 4;
+	[Tooltip("Количество игроков при быстром старте")]
+	[SerializeField] int _countPlayers = 4;
 #endif
 
-	List<Player> _players = new List<Player>(); // Скрипты управления игроками
+	readonly List<Player> _players = new List<Player>();
 	int _currentPlayerNumber;
-	bool _isPlaying; // Идет игра
-	bool _pause; // Пауза игры
-	float _reactionAI = 0.5f; // Реакция AI в сек, чтобы успевали уследить игрок и проиграться анимация
 	float _timeToReactAI = 0;
 
-	public static GameController Instance { get; private set; }
 	Player CurrentPlayer { get { return _players.Count == 0 ? null : _players[_currentPlayerNumber]; } }
+
+	public static GameController Instance { get; private set; }
+
+	public bool IsPause { get; set; }
+
+	public bool IsGameStart { get; private set; }
 
 	void Awake()
 	{
-		Instance = this;
+		if (Instance == null)
+		{
+			Instance = this;
+		}
+		else
+		{
+			Destroy(gameObject);
+		}
 	}
 
 	void Start()
 	{
-		Instantiate(GameData.Instance.gameUI);
+		Instantiate(GameData.Instance.GameUI);
 		Dice.Instance.RollResult += StartTurn;
 		Dice.Instance.Block(true);
 
 #if UNITY_EDITOR
 		// Запуск быстрого старта для отладки
-		if (quickStart)
+		if (_quickStart)
 		{
-			for (int i = 0; i < countPlayers; i++)
+			for (int i = 0; i < _countPlayers; i++)
 			{
-				AddPlayer(GameData.Instance.samplePlayers[i], (Map.Sides)i);
+				AddPlayer(GameData.Instance.SamplePlayers[i], (Map.Sides)i);
 			}
 			StartGame();
 			Menu.Instance.Back();
@@ -47,10 +59,10 @@ public class GameController : MonoBehaviour
 
 	void Update()
 	{
-		if (_timeToReactAI <= 0 && CurrentPlayer != null && CurrentPlayer.type == Player.Type.AI && CurrentPlayer.EndInitialization)
+		if (_timeToReactAI <= 0 && CurrentPlayer != null && CurrentPlayer.PlayerType == Player.Type.AI && CurrentPlayer.IsEndInitialization)
 		{
 			Dice.Instance.Roll();
-			_timeToReactAI = _reactionAI;
+			_timeToReactAI = GameData.Instance.ReactionAI;
 		}
 		else
 		{
@@ -64,7 +76,7 @@ public class GameController : MonoBehaviour
 		// Кнопка меню
 		if (Input.GetKeyDown(KeyCode.Escape))
 		{
-			if (_pause)
+			if (IsPause)
 			{
 				Menu.Instance.Back();
 			}
@@ -102,21 +114,21 @@ public class GameController : MonoBehaviour
 	{
 		_currentPlayerNumber = 0;
 		Dice.Instance.Block(false);
-		_isPlaying = true;
-		_pause = false;
-		GameStatus.Instance.SetCurrentPlayerName(CurrentPlayer.playerName, CurrentPlayer.color);
+		IsGameStart = true;
+		IsPause = false;
+		GameStatus.Instance.SetCurrentPlayerName(CurrentPlayer.PlayerName, CurrentPlayer.NameColor);
 	}
 
 	public void AddPlayer(GameObject player, Map.Sides side, Player.Type type = Player.Type.Player) 
 	{
-		var oldPlayer = _players.Find(p => p.mapSide == side);
+		var oldPlayer = _players.Find(p => p.MapSide == side);
 		if (oldPlayer != null)
 			oldPlayer.DestroyPlayer();
 
-		var goPlayer = Instantiate(player, GameData.Instance.mapController.GetMap(side).GetOrigin().position, Quaternion.identity);
+		var goPlayer = Instantiate(player, GameData.Instance.MapController.GetMap(side).GetOrigin().Position, Quaternion.identity);
 		var sPlayer = goPlayer.GetComponent<Player>();
-		sPlayer.type = type;
-		sPlayer.mapSide = side;
+		sPlayer.PlayerType = type;
+		sPlayer.MapSide = side;
 		sPlayer.EndTurn += EndTurn;
 		_players.Add(sPlayer);
 	}
@@ -131,23 +143,8 @@ public class GameController : MonoBehaviour
 			player.DestroyPlayer();
 		}
 		_players.Clear();
-		_isPlaying = false;
+		IsGameStart = false;
 		GameStatus.Instance.Reset();
-	}
-
-	public bool IsPlaying()
-	{
-		return _isPlaying;
-	}
-
-	public bool IsPause()
-	{
-		return _pause;
-	}
-
-	public void SetPause(bool pause)
-	{
-		_pause = pause;
 	}
 
 	/// <summary>
@@ -156,7 +153,7 @@ public class GameController : MonoBehaviour
 	/// <param name="diceResult">Результат сброса кубика</param>
 	void StartTurn(int diceResult)
 	{
-		CurrentPlayer.StartMove(diceResult);
+		CurrentPlayer.StartTurn(diceResult);
 	}
 
 	/// <summary>
@@ -167,20 +164,20 @@ public class GameController : MonoBehaviour
 		// Все игроки закончили ход?
 		foreach (var player in _players)
 		{
-			if (!player.IsEndMove())
+			if (!player.IsEndTurn)
 				return;
 		}
 		// Текущий игрок добрался до дома?
-		if (CurrentPlayer.IsHome())
+		if (CurrentPlayer.IsEndGame)
 		{
-			GameStatus.Instance.SetWinner(CurrentPlayer.playerName, CurrentPlayer.color);
-			_isPlaying = false;
+			GameStatus.Instance.SetWinner(CurrentPlayer.PlayerName, CurrentPlayer.NameColor);
+			IsGameStart = false;
 		}
 		// Установка следующего игрока
 		_currentPlayerNumber = (++_currentPlayerNumber) % _players.Count;
 		
 		Dice.Instance.Block(false);
-		GameStatus.Instance.SetCurrentPlayerName(CurrentPlayer.playerName, CurrentPlayer.color);
-		_timeToReactAI = _reactionAI;
+		GameStatus.Instance.SetCurrentPlayerName(CurrentPlayer.PlayerName, CurrentPlayer.NameColor);
+		_timeToReactAI = GameData.Instance.ReactionAI;
 	}
 }

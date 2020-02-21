@@ -8,19 +8,20 @@ namespace MapSpace
 	/// </summary>
 	public class Tracker
 	{
-		public Map.Sides side { get; }
-		public bool readyStartMoving;
-
-		public delegate void ShiftMoveDelg();
-		public event ShiftMoveDelg ShiftMove;
-
 		Map _map;
 		Cell _currentCell;
 		List<Cell> _way = new List<Cell>();
 
+		public delegate void ShiftMoveDelg();
+		public event ShiftMoveDelg ShiftMove;
+
+		public Map.Sides Side { get; }
+
+		public bool ReadyStartMoving { get; set; }
+
 		public Tracker(Map.Sides side, MapController mapController) 
 		{
-			this.side = side;
+			Side = side;
 			_map = mapController.GetMap(side);
 			_currentCell = _map.GetOrigin();
 		}
@@ -28,7 +29,7 @@ namespace MapSpace
 		void Shift()
 		{
 			_way.Clear();
-			if (_currentCell.location == Map.Locations.Fen)
+			if (_currentCell.Location == Map.Locations.Fen)
 			{
 				_way.Add(_map.GetNext(_currentCell));
 			}
@@ -39,13 +40,13 @@ namespace MapSpace
 			ShiftMove?.Invoke();
 		}
 
-		public bool CanStartMove(int distance) 
+		public bool CanStartMove(int distance) // TODO: Разбить метод на построить путь и узнать можно ли двигаться
 		{
 			_way.Clear();
 			bool canMove = true;
-			if (_currentCell.exitDistance > 0) 
+			if (_currentCell.ExitDistance > 0) 
 			{
-				canMove = _currentCell.exitDistance == distance;
+				canMove = _currentCell.ExitDistance == distance;
 				distance = canMove?1:0;
 			}
 			
@@ -66,7 +67,7 @@ namespace MapSpace
 				}
 
 				// Проверяем на дом
-				if (nextCell == null && curCell.location == Map.Locations.Home) 
+				if (nextCell == null && curCell.Location == Map.Locations.Home) 
 				{
 					if (distance == i) // Если зафиксирована в доме
 					{
@@ -84,25 +85,25 @@ namespace MapSpace
 				// Строим путь
 				if (i == 1)// Последняя ячейка за ход
 				{
-					if (nextCell.location == Map.Locations.Cut)
+					if (nextCell.Location == Map.Locations.Cut)
 					{
 						extra = _map.GetExtra(nextCell);
-						canMove = nextCell.tracker?.side != side && extra[extra.Count - 1].tracker?.side != side;
+						canMove = nextCell.Tracker?.Side != Side && extra[extra.Count - 1].Tracker?.Side != Side;
 					}
-					else if (nextCell.location == Map.Locations.Fen)
+					else if (nextCell.Location == Map.Locations.Fen)
 					{
 						extra = _map.GetExtra(nextCell);
-						canMove = extra.Exists(e => e.tracker == null) || extra[extra.Count - 1].tracker?.side != side;
+						canMove = extra.Exists(e => e.Tracker == null) || extra[extra.Count - 1].Tracker?.Side != Side;
 						extra = nextCell == extra[0]? new List<Cell>() : new List<Cell>() { extra[0] };
 					}
 					else
 					{
-						canMove = nextCell.tracker?.side != side || nextCell.tracker == this; // Если там не свой
+						canMove = nextCell.Tracker?.Side != Side || nextCell.Tracker == this; // Если там не свой
 					}
 				}
 				else // Не последняя ячейка за ход
 				{
-					canMove = nextCell.tracker == null || nextCell.tracker == this;
+					canMove = nextCell.Tracker == null || nextCell.Tracker == this;
 				}
 				if (!canMove)
 					break;
@@ -110,7 +111,7 @@ namespace MapSpace
 				curCell = nextCell;
 			}
 			_way.AddRange(extra);
-			return readyStartMoving = canMove;
+			return ReadyStartMoving = canMove;
 		}
 
 		public bool HasNextTarget()
@@ -127,12 +128,12 @@ namespace MapSpace
 				_way.RemoveAt(0);
 				if (cell != null) 
 				{
-					if (_currentCell.tracker == this)
-						_currentCell.tracker = null;
-					if (cell.location != Map.Locations.Origin && cell.location != Map.Locations.Quagmire) 
+					if (_currentCell.Tracker == this)
+						_currentCell.Tracker = null;
+					if (cell.Location != Map.Locations.Origin && cell.Location != Map.Locations.Quagmire) 
 					{
-						cell.tracker?.Shift();
-						cell.tracker = this;
+						cell.Tracker?.Shift();
+						cell.Tracker = this;
 					}
 					_currentCell = cell;
 					
@@ -143,7 +144,7 @@ namespace MapSpace
 
 		public bool IsHome() 
 		{
-			return _currentCell.location == Map.Locations.Home;
+			return _currentCell.Location == Map.Locations.Home;
 		}
 
 		/// <summary>
@@ -151,7 +152,7 @@ namespace MapSpace
 		/// </summary>
 		public void DisposeTracker() 
 		{
-			_currentCell.tracker = null;
+			_currentCell.Tracker = null;
 		}
 	}
 }

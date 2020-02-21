@@ -81,7 +81,7 @@ namespace MapSpace
 		public List<Cell> GetExtra(Cell cell) 
 		{
 			List<Cell> extra;
-			switch (cell.location) 
+			switch (cell.Location) 
 			{
 				case Locations.Fen:
 					foreach (var fen in _fens)
@@ -110,7 +110,7 @@ namespace MapSpace
 		int GetEndIndex()
 		{
 			int end = _way.Count - 1;
-			while (_way[end].tracker != null)
+			while (_way[end].Tracker != null)
 			{
 				end--;
 			}

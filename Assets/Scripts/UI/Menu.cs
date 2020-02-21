@@ -8,21 +8,25 @@ using UnityEditor;
 
 public class Menu : MonoBehaviour
 {
+	[Tooltip("Кнопка возврата в игру")]
+	[SerializeField] GameObject _returnButton;
+
+	[Tooltip("Меню выбора персонажа")]
+	[SerializeField] SelectPlayersMenu _selectPlayersMenu;
+
 	public static Menu Instance { get; private set; }
-	public SelectPlayersMenu selectPlayersMenu;
-	public GameObject returnButton;
 
 	void Awake()
 	{
 		Instance = this;
-		returnButton.SetActive(false);
+		_returnButton.SetActive(false);
 	}
 
 	public void Display()
 	{
-		GameController.Instance.SetPause(true);
+		GameController.Instance.IsPause = true;
 		gameObject.SetActive(true);
-		returnButton.SetActive(GameController.Instance.IsPlaying());
+		_returnButton.SetActive(GameController.Instance.IsGameStart);
 	}
 
 	/// <summary>
@@ -30,14 +34,14 @@ public class Menu : MonoBehaviour
 	/// </summary>
 	public void Back()
 	{
-		if (selectPlayersMenu.IsDisplay())
+		if (_selectPlayersMenu.IsDisplay)
 		{
-			selectPlayersMenu.Back();
+			_selectPlayersMenu.Back();
 		}
-		else if (GameController.Instance.IsPlaying())
+		else if (GameController.Instance.IsGameStart)
 		{
 			gameObject.SetActive(false);
-			GameController.Instance.SetPause(false);
+			GameController.Instance.IsPause = false;
 		}
 	}
 
@@ -49,7 +53,7 @@ public class Menu : MonoBehaviour
 	{
 		GameController.Instance.ResetGame();
 		gameObject.SetActive(false);
-		selectPlayersMenu.Display();
+		_selectPlayersMenu.IsDisplay = true;
 	}
 
 	public void ExitGame()

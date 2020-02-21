@@ -4,32 +4,33 @@ using UnityEngine.UI;
 
 public class GameStatus : MonoBehaviour
 {
+	[SerializeField] Text _playerNameText;
+	[SerializeField] Text _winnerNameText;
+	[SerializeField] GameObject _winnerMessage;
+
 	public static GameStatus Instance { get; private set; }
-	public Text playerNameText;
-	public GameObject winnerMessage;
-	public Text winnerNameText;
 
 	void Awake()
 	{
 		Instance = this;
-		winnerMessage.SetActive(false);
+		_winnerMessage.SetActive(false);
 	}
 
 	public void SetCurrentPlayerName(string name, Color color) 
 	{
-		playerNameText.text = name;
-		playerNameText.color = color;
+		_playerNameText.text = name;
+		_playerNameText.color = color;
 	}
 
 	public void SetWinner(string name, Color color) 
 	{
-		winnerNameText.text = name;
-		winnerNameText.color = color;
-		winnerMessage.SetActive(true);
+		_winnerNameText.text = name;
+		_winnerNameText.color = color;
+		_winnerMessage.SetActive(true);
 	}
 
 	public void Reset() 
 	{
-		winnerMessage.SetActive(false);
+		_winnerMessage.SetActive(false);
 	}
 }

@@ -3,17 +3,16 @@ using UnityEngine.UI;
 using System.Collections.Generic;
 using UnityEngine.EventSystems;
 
-public class Dice : MonoBehaviour
+public sealed class Dice : MonoBehaviour
 {
-	public Animator animator;
+	[SerializeField] Animator _animator;
+	int _number = 1;
+	bool _blockRoll;
 
 	public delegate void RollDiceResult(int result);
 	public event RollDiceResult RollResult;
 
-	int _number = 1;
-
 	public static Dice Instance { get; private set; }
-	bool _blockRoll;
 
 	void Awake()
 	{
@@ -24,10 +23,10 @@ public class Dice : MonoBehaviour
 	/// Бростить кость
 	/// После сброса, возможность бросить еще раз будет заблокирована, пока ее не вернут методом UnlockRoll
 	/// </summary>
-	/// /// <param name="number">Результат броска</param>
+	/// <param name="number">Результат броска</param>
 	public void Roll(int number = 0)
 	{
-		if (!_blockRoll && !GameController.Instance.IsPause() && GameController.Instance.IsPlaying())
+		if (!_blockRoll && !GameController.Instance.IsPause && GameController.Instance.IsGameStart)
 		{
 			_number = number > 0 ? number : Random.Range(1, 7);
 			Block(true);
@@ -40,7 +39,7 @@ public class Dice : MonoBehaviour
 	/// </summary>
 	public void UpdateAnimNumber() 
 	{
-		animator.SetInteger("Number", _number);
+		_animator.SetInteger("Number", _number);
 	}
 
 	/// <summary>
@@ -59,6 +58,6 @@ public class Dice : MonoBehaviour
 	public void Block(bool block)
 	{
 		_blockRoll = block;
-		animator.SetBool("Jump", !block);
+		_animator.SetBool("Jump", !block);
 	}
 }

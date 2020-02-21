@@ -6,14 +6,19 @@ using UnityEngine.UI;
 
 public class SelectPlayersMenu : MonoBehaviour
 {
+	[Tooltip("Кнопка начала игры")]
+	[SerializeField] Button _startGameButton;
+
 	[Header("Порядок списков(side) B.L.T.R.")]
-	[Tooltip("Порядок: Bottom, Left, Top, Right")]
-	public List<Dropdown> colorDropdowns;
-	[Tooltip("Порядок: Bottom, Left, Top, Right")]
-	public List<Dropdown> typeDropdowns;
-	public Button startButton;
+	[Tooltip("Списки выбора цвета игроков. Порядок: Bottom, Left, Top, Right")]
+	[SerializeField] List<Dropdown> _playerColorDropdowns;
+
+	[Tooltip("Списки выбора типа игрока. Порядок: Bottom, Left, Top, Right")]
+	[SerializeField] List<Dropdown> _playerTypeDropdowns;
 
 	List<Dropdown.OptionData> _sampleDropdownsOptions; // Список опций. Порядок(цвет): З.К.С.Ж.
+
+	public bool IsDisplay { get => gameObject.activeSelf; set => gameObject.SetActive(value); }
 
 	private void Awake()
 	{
@@ -22,22 +27,12 @@ public class SelectPlayersMenu : MonoBehaviour
 
 	void Start()
 	{
-		_sampleDropdownsOptions = new List<Dropdown.OptionData>(colorDropdowns[0].options);
-		foreach (var cdd in colorDropdowns)
+		_sampleDropdownsOptions = new List<Dropdown.OptionData>(_playerColorDropdowns[0].options);
+		foreach (var cdd in _playerColorDropdowns)
 		{
 			cdd.options = new List<Dropdown.OptionData>(_sampleDropdownsOptions);
 		}
-		startButton.interactable = false;
-	}
-
-	public void Display()
-	{
-		gameObject.SetActive(true);
-	}
-
-	public bool IsDisplay()
-	{
-		return gameObject.activeSelf;
+		_startGameButton.interactable = false;
 	}
 
 	public void Back()
@@ -48,12 +43,12 @@ public class SelectPlayersMenu : MonoBehaviour
 	
 	public void StartGame()
 	{
-		for (int i = 0; i < colorDropdowns.Count; i++)
+		for (int i = 0; i < _playerColorDropdowns.Count; i++)
 		{
-			if (colorDropdowns[i].value != 0)
+			if (_playerColorDropdowns[i].value != 0)
 			{
-				var numberPlayer = _sampleDropdownsOptions.IndexOf(colorDropdowns[i].options[colorDropdowns[i].value]) - 1;// Номер игрока в списке
-				GameController.Instance.AddPlayer(GameData.Instance.samplePlayers[numberPlayer], (Map.Sides)i, (Player.Type)typeDropdowns[i].value);
+				var numberPlayer = _sampleDropdownsOptions.IndexOf(_playerColorDropdowns[i].options[_playerColorDropdowns[i].value]) - 1;// Номер игрока в списке
+				GameController.Instance.AddPlayer(GameData.Instance.SamplePlayers[numberPlayer], (Map.Sides)i, (Player.Type)_playerTypeDropdowns[i].value);
 			}
 		}
 		gameObject.SetActive(false);
@@ -65,14 +60,14 @@ public class SelectPlayersMenu : MonoBehaviour
 	/// </summary>
 	public void UpdateColorDropdowns()
 	{
-		var selectedOptions = colorDropdowns.Where(dd => dd.value != 0).Select(dd => dd.options[dd.value]);
-		foreach (var cdd in colorDropdowns)
+		var selectedOptions = _playerColorDropdowns.Where(dd => dd.value != 0).Select(dd => dd.options[dd.value]);
+		foreach (var cdd in _playerColorDropdowns)
 		{
 			var currentOption = cdd.options[cdd.value];
 			cdd.options = _sampleDropdownsOptions.Where(so => so == currentOption || !selectedOptions.Contains(so)).ToList();
 			cdd.value = cdd.options.IndexOf(currentOption);
 
-			startButton.interactable = selectedOptions.Any();
+			_startGameButton.interactable = selectedOptions.Any();
 		}
 	}
 }
