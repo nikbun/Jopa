@@ -1,4 +1,5 @@
 ﻿using MapSpace;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -8,15 +9,11 @@ public class SelectPlayersMenu : MonoBehaviour
 {
 	[Tooltip("Кнопка начала игры")]
 	[SerializeField] Button _startGameButton;
+	
+	[Tooltip("Списки параметров игроков")]
+	[SerializeField] List<PlayerDropdowns> _playerDropdowns;
 
-	[Header("Порядок списков(side) B.L.T.R.")]
-	[Tooltip("Списки выбора цвета игроков. Порядок: Bottom, Left, Top, Right")]
-	[SerializeField] List<Dropdown> _playerColorDropdowns;
-
-	[Tooltip("Списки выбора типа игрока. Порядок: Bottom, Left, Top, Right")]
-	[SerializeField] List<Dropdown> _playerTypeDropdowns;
-
-	List<Dropdown.OptionData> _sampleDropdownsOptions; // Список опций. Порядок(цвет): З.К.С.Ж.
+	readonly List<PlayerOptionData> _samplePlayerDropdownsOptions = new List<PlayerOptionData>();
 
 	public bool IsDisplay { get => gameObject.activeSelf; set => gameObject.SetActive(value); }
 
@@ -27,10 +24,20 @@ public class SelectPlayersMenu : MonoBehaviour
 
 	void Start()
 	{
-		_sampleDropdownsOptions = new List<Dropdown.OptionData>(_playerColorDropdowns[0].options);
-		foreach (var cdd in _playerColorDropdowns)
+		_samplePlayerDropdownsOptions.Add(new PlayerOptionData("Отсутствует")); // TODO: Вывести текст в файл локализации
+		foreach (var player in GameData.Instance.Players)
 		{
-			cdd.options = new List<Dropdown.OptionData>(_sampleDropdownsOptions);
+			_samplePlayerDropdownsOptions.Add(new PlayerOptionData(player));
+		}
+
+		foreach (var pd in _playerDropdowns)
+		{
+			pd.playerDropdown.options = new List<Dropdown.OptionData>(_samplePlayerDropdownsOptions);
+			pd.typeDropdown.options.Clear();
+			foreach (var type in Enum.GetValues(typeof(Player.Type)))
+			{
+				pd.typeDropdown.options.Add(new Dropdown.OptionData(type.ToString()));
+			}
 		}
 		_startGameButton.interactable = false;
 	}
@@ -43,14 +50,17 @@ public class SelectPlayersMenu : MonoBehaviour
 	
 	public void StartGame()
 	{
-		for (int i = 0; i < _playerColorDropdowns.Count; i++)
+		_playerDropdowns.ForEach(pd => 
 		{
-			if (_playerColorDropdowns[i].value != 0)
+			if (pd.playerDropdown.value > 0) 
 			{
-				var numberPlayer = _sampleDropdownsOptions.IndexOf(_playerColorDropdowns[i].options[_playerColorDropdowns[i].value]) - 1;// Номер игрока в списке
-				GameController.Instance.AddPlayer(GameData.Instance.SamplePlayers[numberPlayer], (Map.Sides)i, (Player.Type)_playerTypeDropdowns[i].value);
+				GameController.Instance.AddPlayer(
+					((PlayerOptionData)pd.playerDropdown.options[pd.playerDropdown.value]).player,
+					pd.side,
+					(Player.Type)Enum.Parse(typeof(Player.Type), pd.typeDropdown.options[pd.typeDropdown.value].text)
+				);
 			}
-		}
+		});
 		gameObject.SetActive(false);
 		GameController.Instance.StartGame();
 	}
@@ -60,14 +70,38 @@ public class SelectPlayersMenu : MonoBehaviour
 	/// </summary>
 	public void UpdateColorDropdowns()
 	{
-		var selectedOptions = _playerColorDropdowns.Where(dd => dd.value != 0).Select(dd => dd.options[dd.value]);
-		foreach (var cdd in _playerColorDropdowns)
+		var selectedOptions = _playerDropdowns.Select(pd => pd.playerDropdown).Where(d => d.value != 0).Select(d => d.options[d.value]);
+		foreach (var cdd in _playerDropdowns.Select(pd => pd.playerDropdown))
 		{
 			var currentOption = cdd.options[cdd.value];
-			cdd.options = _sampleDropdownsOptions.Where(so => so == currentOption || !selectedOptions.Contains(so)).ToList();
+			cdd.options = _samplePlayerDropdownsOptions.Where(so => so == currentOption || !selectedOptions.Contains(so)).Cast<Dropdown.OptionData>().ToList();
 			cdd.value = cdd.options.IndexOf(currentOption);
 
 			_startGameButton.interactable = selectedOptions.Any();
 		}
+	}
+
+	[System.Serializable]
+	class PlayerDropdowns
+	{
+		public Map.Sides side;
+		public Dropdown playerDropdown;
+		public Dropdown typeDropdown;
+	}
+
+	class PlayerOptionData : Dropdown.OptionData
+	{
+		PlayerData _playerData;
+
+		public GameObject player { get => _playerData.SamplePlayer; }
+
+		public PlayerOptionData(PlayerData playersData) 
+		{
+			_playerData = playersData;
+			text = playersData.Name;
+			image = playersData.PawnSprite;
+		}
+
+		public PlayerOptionData(string text):base(text) {}
 	}
 }

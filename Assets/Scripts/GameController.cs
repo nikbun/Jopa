@@ -49,7 +49,7 @@ public class GameController : MonoBehaviour
 		{
 			for (int i = 0; i < _countPlayers; i++)
 			{
-				AddPlayer(GameData.Instance.SamplePlayers[i], (Map.Sides)i);
+				AddPlayer(GameData.Instance.Players[i].SamplePlayer, (Map.Sides)i);
 			}
 			StartGame();
 			Menu.Instance.Back();
@@ -107,19 +107,7 @@ public class GameController : MonoBehaviour
 #endif
 	}
 
-	/// <summary>
-	/// Устанавливаем игроков на стартовые позиции
-	/// </summary>
-	public void StartGame()
-	{
-		_currentPlayerNumber = 0;
-		Dice.Instance.Block(false);
-		IsGameStart = true;
-		IsPause = false;
-		GameStatus.Instance.SetCurrentPlayerName(CurrentPlayer.PlayerName, CurrentPlayer.NameColor);
-	}
-
-	public void AddPlayer(GameObject player, Map.Sides side, Player.Type type = Player.Type.Player) 
+	public void AddPlayer(GameObject player, Map.Sides side, Player.Type type = Player.Type.Player)
 	{
 		var oldPlayer = _players.Find(p => p.MapSide == side);
 		if (oldPlayer != null)
@@ -131,6 +119,18 @@ public class GameController : MonoBehaviour
 		sPlayer.MapSide = side;
 		sPlayer.EndTurn += EndTurn;
 		_players.Add(sPlayer);
+	}
+
+	/// <summary>
+	/// Устанавливаем игроков на стартовые позиции
+	/// </summary>
+	public void StartGame()
+	{
+		_currentPlayerNumber = 0;
+		Dice.Instance.Block(false);
+		IsGameStart = true;
+		IsPause = false;
+		GameStatus.Instance.SetCurrentPlayerName(CurrentPlayer.PlayerName, CurrentPlayer.NameColor);
 	}
 
 	/// <summary>

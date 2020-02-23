@@ -16,10 +16,8 @@ public sealed class GameData : MonoBehaviour
 	[Tooltip("Интерфейс пользователя")]
 	[SerializeField] GameObject _gameUI;
 
-	[Space(order = 0)]
-	[Header("Экземпляры игроков: Порядок(цвет) З.К.С.Ж.", order = 1)]
-	[Tooltip("Порядок: Зеленый, Красный, Синий, Желтый")]
-	[SerializeField] List<GameObject> _samplePlayers;
+	[Tooltip("Информация об игроках")]
+	[SerializeField] List<PlayerData> _players;
 
 	public static GameData Instance { get; private set; }
 
@@ -31,8 +29,7 @@ public sealed class GameData : MonoBehaviour
 
 	public GameObject GameUI { get => _gameUI; }
 
-	public List<GameObject> SamplePlayers { get => _samplePlayers; }
-
+	public List<PlayerData> Players { get => _players; }
 
 	GameData()
 	{
@@ -50,4 +47,25 @@ public sealed class GameData : MonoBehaviour
 			Destroy(gameObject);
 		}
 	}
+}
+
+
+[System.Serializable]
+public class PlayerData
+{
+	[SerializeField] string _name;
+	[SerializeField] Color _color;
+	[SerializeField] GameObject _samplePlayer;
+	[SerializeField] GameObject _samplePawn;
+	[SerializeField] Sprite _pawnSprite;
+
+	public string Name { get => _name; }
+
+	public Color Color { get => _color; }
+
+	public GameObject SamplePlayer { get => _samplePlayer; }
+
+	public GameObject SamplePawn { get => _samplePawn; }
+
+	public Sprite PawnSprite { get => _pawnSprite; }
 }
